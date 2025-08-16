@@ -1,0 +1,43 @@
+// API de resumo para Vercel
+export default async function handler(req, res) {
+  // CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  if (req.method === 'POST') {
+    try {
+      const { query, results } = req.body;
+      
+      if (!query || !results) {
+        return res.status(400).json({ error: 'Query e results obrigatórios' });
+      }
+
+      // Gerar resumo simples
+      const sources = [...new Set(results.map(r => r.site_name))];
+      const totalResults = results.length;
+      
+      const summary = `Encontrei ${totalResults} resultados sobre "${query}" em ${sources.length} fontes diferentes:
+
+${sources.map(source => `• ${source}`).join('\n')}
+
+Os resultados incluem discussões, artigos e projetos relacionados ao tema. As fontes mais relevantes destacam ${results.slice(0, 3).map(r => r.title).join(', ')}.
+
+Esta busca agregou informações de plataformas como Hacker News, Dev.to, GitHub e outras fontes técnicas especializadas.`;
+
+      return res.status(200).json({ summary });
+      
+    } catch (error) {
+      return res.status(500).json({ 
+        error: 'Erro ao gerar resumo',
+        message: error.message 
+      });
+    }
+  }
+
+  return res.status(404).json({ error: 'Método não permitido' });
+}

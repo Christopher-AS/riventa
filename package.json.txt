@@ -1,0 +1,10 @@
+{
+  "name": "riventa",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd apps/web && npm run build",
+    "dev": "cd apps/web && npm run dev",
+    "start": "cd apps/web && npm run start"
+  },
+  "dependencies": {}
+}

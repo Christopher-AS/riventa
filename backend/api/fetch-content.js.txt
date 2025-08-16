@@ -1,0 +1,89 @@
+// API de fetch de conteúdo para Vercel
+export default async function handler(req, res) {
+  // CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  if (req.method === 'POST') {
+    try {
+      const { url, title } = req.body;
+      
+      if (!url) {
+        return res.status(400).json({ error: 'URL obrigatória' });
+      }
+
+      console.log('Fazendo fetch de:', url);
+      
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        },
+        signal: AbortSignal.timeout(10000)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const html = await response.text();
+      const content = extractContent(html, title);
+      
+      return res.status(200).json({ 
+        content,
+        url,
+        title
+      });
+      
+    } catch (error) {
+      console.error('Erro ao buscar conteúdo:', error);
+      return res.status(500).json({ 
+        error: 'Erro ao buscar conteúdo',
+        message: error.message 
+      });
+    }
+  }
+
+  return res.status(404).json({ error: 'Método não permitido' });
+}
+
+function extractContent(html, title) {
+  try {
+    // Remover scripts e styles
+    let text = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+    text = text.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+    
+    // Extrair título se não fornecido
+    if (!title) {
+      const titleMatch = text.match(/<title[^>]*>(.*?)<\/title>/i);
+      title = titleMatch ? titleMatch[1].trim() : 'Sem título';
+    }
+    
+    // Remover tags HTML
+    text = text.replace(/<[^>]*>/g, ' ');
+    text = text.replace(/\s+/g, ' ').trim();
+    
+    // Limitar palavras
+    const words = text.split(' ');
+    const excerpt = words.slice(0, 500).join(' ');
+    
+    if (excerpt.length < 100) {
+      return `Título: ${title}\n\nConteúdo não disponível para preview.\n\nClique em "Ver Original" para acessar o artigo completo.`;
+    }
+    
+    let content = `# ${title}\n\n${excerpt}`;
+    
+    if (words.length > 500) {
+      content += '...\n\n[Conteúdo truncado - clique em "Ver Original" para ler completo]';
+    }
+    
+    return content;
+    
+  } catch (error) {
+    return 'Erro ao processar conteúdo. Clique em "Ver Original" para acessar.';
+  }
+}
