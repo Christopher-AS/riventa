@@ -3,20 +3,17 @@ import cors from "cors";
 
 const app = express();
 
-// --- CORS robusto: permite seu domínio da Vercel, qualquer preview *.vercel.app e localhost ---
+// CORS seguro: seu domínio na Vercel, previews *.vercel.app e localhost
 const PROD_ORIGIN = "https://riventa.vercel.app";
 
 const corsOptions = {
   origin(origin, cb) {
     try {
-      if (!origin) return cb(null, true); // server-to-server, healthcheck etc.
+      if (!origin) return cb(null, true); // healthchecks/server-to-server
       if (origin === PROD_ORIGIN) return cb(null, true);
-
-      // permitir previews da Vercel e dev local
       const { hostname } = new URL(origin);
       if (hostname === "localhost" || hostname === "127.0.0.1") return cb(null, true);
-      if (hostname.endsWith(".vercel.app")) return cb(null, true);
-
+      if (hostname.endsWith(".vercel.app")) return cb(null, true); // previews
       return cb(new Error("Not allowed by CORS"));
     } catch {
       return cb(new Error("Not allowed by CORS"));
@@ -29,7 +26,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
-// --- fim CORS ---
 
 app.use(express.json());
 
@@ -39,8 +35,6 @@ app.post("/search", async (req, res) => {
   try {
     const { q } = req.body || {};
     if (!q) return res.status(400).json({ error: "Missing q" });
-
-    // TODO: integre sua IA/Buscas aqui
     const answer = `Resumo inteligente para: ${q}`;
     res.json({ answer });
   } catch (e) {
