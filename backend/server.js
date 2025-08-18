@@ -3,30 +3,17 @@ import cors from "cors";
 
 const app = express();
 
-// CORS seguro: seu domínio na Vercel, previews *.vercel.app e localhost
-const PROD_ORIGIN = "https://riventa.vercel.app";
+// ---- LOG do Origin (para sabermos exatamente o que o navegador está enviando)
+app.use((req, _res, next) => {
+  console.log("Method:", req.method, "Path:", req.path, "Origin:", req.headers.origin || "(no-origin)");
+  next();
+});
 
-const corsOptions = {
-  origin(origin, cb) {
-    try {
-      if (!origin) return cb(null, true); // healthchecks/server-to-server
-      if (origin === PROD_ORIGIN) return cb(null, true);
-      const { hostname } = new URL(origin);
-      if (hostname === "localhost" || hostname === "127.0.0.1") return cb(null, true);
-      if (hostname.endsWith(".vercel.app")) return cb(null, true); // previews
-      return cb(new Error("Not allowed by CORS"));
-    } catch {
-      return cb(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  optionsSuccessStatus: 204,
-};
+// ---- CORS ABERTO (debug) — garante que funcione agora
+app.use(cors({ origin: true, methods: ["GET", "POST", "OPTIONS"], allowedHeaders: ["Content-Type", "Authorization"] }));
+app.options("*", cors());
 
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
-
+// ---- resto
 app.use(express.json());
 
 app.get("/health", (_, res) => res.json({ ok: true }));
