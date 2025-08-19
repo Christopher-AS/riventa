@@ -4,7 +4,7 @@ import OpenAI from "openai";
 
 const app = express();
 
-// (opcional) log pra debug
+// Log simples de entrada (ajuda a depurar)
 app.use((req, _res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} | Origin: ${req.headers.origin || "-"}`);
   next();
@@ -55,24 +55,39 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-// ===== OpenAI client (opcional: funciona com fallback se não setar a chave) =====
-const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
+// ===== OpenAI client =====
+const openaiKey = process.env.OPENAI_API_KEY || "";
+const openai = openaiKey ? new OpenAI({ apiKey: openaiKey }) : null;
 
+// Healthcheck
 app.get("/health", (_, res) => res.json({ ok: true }));
+
+// Diagnóstico (não vaza a chave)
+app.get("/diag", (_, res) => {
+  res.json({
+    ok: true,
+    node: process.version,
+    hasOpenAIKey: Boolean(openaiKey),
+    env: {
+      PORT: process.env.PORT || null,
+      RENDER: Boolean(process.env.RENDER || process.env.RENDER_SERVICE_ID),
+    },
+  });
+});
 
 app.post("/search", async (req, res) => {
   try {
     const { q } = req.body || {};
     if (!q) return res.status(400).json({ error: "Missing q" });
 
-    // Se não houver chave, devolve fallback simples
     if (!openai) {
+      // Fallback sem chave
       const answer = `Resumo inteligente para: ${q}`;
-      return res.json({ answer, note: "OPENAI_API_KEY não configurada (usando fallback)." });
+      return res.json({ answer, note: "OPENAI_API_KEY ausente (fallback local)." });
     }
 
-    const prompt = `Você é o assistente do Riventa. Responda de forma clara, curta e em pt-BR.
-Pergunta do usuário: "${q}"`;
+    const prompt = `Você é o assistente do Riventa. Responda em português, de forma clara e objetiva.
+Pergunta: "${q}"`;
 
     const resp = await openai.responses.create({
       model: "gpt-4o-mini",
@@ -80,10 +95,18 @@ Pergunta do usuário: "${q}"`;
     });
 
     const answer = (resp?.output_text || "").trim() || "Sem resposta.";
-    res.json({ answer });
+    return res.json({ answer });
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: "Internal error" });
+    // Log detalhado no servidor + retorno informativo
+    const status = e?.status || e?.response?.status || 500;
+    const data = e?.response?.data || null;
+    console.error("OpenAI error:", { status, message: e?.message, data });
+    return res.status(500).json({
+      error: "OPENAI_ERROR",
+      status,
+      message: e?.message || "Internal error",
+      details: data,
+    });
   }
 });
 
