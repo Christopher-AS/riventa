@@ -81,4 +81,4 @@ Uma ferramenta de busca avançada que combina múltiplas fontes de informação 
 1\. \*\*Clone o repositório:\*\*
 
 ```bash
-
+<!-- Force deploy with vite config in frontend -->
