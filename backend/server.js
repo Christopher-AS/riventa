@@ -3,17 +3,57 @@ import cors from "cors";
 
 const app = express();
 
-// ---- LOG do Origin (para sabermos exatamente o que o navegador estÃ¡ enviando)
+// (opcional) log rápido pra debug
 app.use((req, _res, next) => {
-  console.log("Method:", req.method, "Path:", req.path, "Origin:", req.headers.origin || "(no-origin)");
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} | Origin: ${req.headers.origin || "-"}`);
   next();
 });
 
-// ---- CORS ABERTO (debug) â€” garante que funcione agora
-app.use(cors({ origin: true, methods: ["GET", "POST", "OPTIONS"], allowedHeaders: ["Content-Type", "Authorization"] }));
-app.options("*", cors());
+// ===== CORS seguro: produção + previews da Vercel + localhost =====
+const allowedHosts = new Set([
+  "riventa.vercel.app",   // produção
+  "localhost",
+  "127.0.0.1",
+]);
 
-// ---- resto
+function isAllowedOrigin(origin) {
+  if (!origin) return true; // chamadas server-to-server/healthcheck
+  try {
+    const host = new URL(origin).hostname;
+    return allowedHosts.has(host) || host.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
+
+const corsOptions = {
+  origin(origin, cb) {
+    if (isAllowedOrigin(origin)) return cb(null, true);
+    return cb(new Error("Not allowed by CORS"));
+  },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+
+// Preflight OPTIONS sem usar "*" (Express 5 não aceita)
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    const origin = req.headers.origin || "";
+    if (!isAllowedOrigin(origin)) return res.status(403).send("CORS preflight blocked");
+    res.set("Access-Control-Allow-Origin", origin || "*");
+    res.set("Vary", "Origin");
+    res.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    return res.sendStatus(204);
+  }
+  next();
+});
+
+// =================================================================
+
 app.use(express.json());
 
 app.get("/health", (_, res) => res.json({ ok: true }));
