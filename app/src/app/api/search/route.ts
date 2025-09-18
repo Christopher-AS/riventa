@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
+import { env } from "@/lib/env";
 
 type Ok = { ok: true; model: string; answer: string; usage?: unknown };
 type Err = { ok: false; error: string };
 
 export async function POST(req: Request) {
   try {
-    const key = process.env.OPENAI_API_KEY;
-    if (!key) {
-      return NextResponse.json<Err>({ ok: false, error: "OPENAI_API_KEY ausente" }, { status: 500 });
-    }
+    const key = env.OPENAI_API_KEY;
 
     const body = await req.json().catch(() => ({}));
     const q = (body?.q ?? "").toString().trim();
