@@ -1,0 +1,52 @@
+# ===== deps & package managers =====
+node_modules
+.pnpm-store
+.npm
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
+# ===== builds & caches =====
+.next
+out
+dist
+build
+.cache
+.turbo
+.vercel
+coverage
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===== env & secrets =====
+.env
+.env.*
+!.env.example
+
+# ===== sistemas/IDEs =====
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+*.swp
+*.swo
+
+# ===== VCS =====
+.git
+.gitignore
+
+# ===== testes (se usar) =====
+cypress/videos
+cypress/screenshots
+playwright-report
+test-results
+
+# ===== bancos locais (se usar Prisma/SQLite) =====
+prisma/dev.db
+prisma/dev.db-journal

@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/** ====== USER & PROFILE ====== **/
+model User {
+  id         String       @id @default(uuid()) @map("id")
+  email      String       @unique @map("email")
+  password   String       @map("password")
+  createdAt  DateTime     @default(now()) @map("createdAt")
+
+  // relações ativas do social
+  profile    UserProfile?
+  posts      Post[]
+  postLikes  PostLike[]
+  following  Follow[]     @relation("follows_as_follower")
+  followers  Follow[]     @relation("follows_as_following")
+
+  @@map("User")
+}
+
+model UserProfile {
+  id        String  @id @default(uuid()) @map("id")
+  userId    String  @unique @map("userId")
+  user      User    @relation(fields: [userId], references: [id])
+  name      String? @map("name")
+  bio       String? @map("bio")
+  avatarUrl String? @map("avatarUrl")
+
+  @@map("UserProfile")
+}
+
+/** ====== SOCIAL: POST / LIKE / FOLLOW ====== **/
+model Post {
+  id        String    @id @default(uuid()) @map("id")
+  authorId  String    @map("authorId")
+  author    User      @relation(fields: [authorId], references: [id])
+  content   String    @map("content")
+  createdAt DateTime  @default(now()) @map("createdAt")
+
+  likes     PostLike[]
+
+  @@map("Post")
+}
+
+model PostLike {
+  id        String   @id @default(uuid()) @map("id")
+  postId    String   @map("postId")
+  post      Post     @relation(fields: [postId], references: [id])
+  userId    String   @map("userId")
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now()) @map("createdAt")
+
+  @@unique([postId, userId])
+  @@map("PostLike")
+}
+
+model Follow {
+  id          String   @id @default(uuid()) @map("id")
+  followerId  String   @map("followerId")
+  followingId String   @map("followingId")
+  createdAt   DateTime @default(now()) @map("createdAt")
+
+  follower    User     @relation("follows_as_follower", fields: [followerId], references: [id])
+  following   User     @relation("follows_as_following", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
+  @@map("Follow")
+}
