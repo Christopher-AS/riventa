@@ -7,15 +7,23 @@ const bodySchema = z.object({
 });
 
 /**
- * Next 15: context.params pode ser Promise<{ postId: string }>.
- * Precisamos aguardar para extrair o postId com segurança.
+ * Compatível com Next 15: o "context.params" pode ser Promise.
+ * Tipamos "ctx" como any para satisfazer a assinatura nova
+ * e tratamos os dois casos (Promise ou objeto direto).
  */
-export async function POST(
-  req: NextRequest,
-  ctx: { params: Promise<{ postId: string }> }
-) {
+export async function POST(req: NextRequest, ctx: any) {
   try {
-    const { postId } = await ctx.params;
+    const raw = ctx?.params;
+    const params =
+      raw && typeof raw.then === "function" ? await raw : raw;
+    const postId = params?.postId as string;
+
+    if (!postId) {
+      return NextResponse.json(
+        { ok: false, error: "postId ausente nos parâmetros" },
+        { status: 400 }
+      );
+    }
 
     const json = await req.json().catch(() => ({}));
     const parsed = bodySchema.safeParse(json);
