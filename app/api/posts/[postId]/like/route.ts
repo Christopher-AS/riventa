@@ -7,15 +7,13 @@ const bodySchema = z.object({
 });
 
 /**
- * Compatível com Next 15: o "context.params" pode ser Promise.
- * Tipamos "ctx" como any para satisfazer a assinatura nova
- * e tratamos os dois casos (Promise ou objeto direto).
+ * Compatível com Next 15: "context.params" pode vir como Promise.
+ * Tipamos "ctx" como any e normalizamos para aceitar Promise ou objeto.
  */
 export async function POST(req: NextRequest, ctx: any) {
   try {
     const raw = ctx?.params;
-    const params =
-      raw && typeof raw.then === "function" ? await raw : raw;
+    const params = raw && typeof raw.then === "function" ? await raw : raw;
     const postId = params?.postId as string;
 
     if (!postId) {
