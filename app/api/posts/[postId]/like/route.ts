@@ -13,7 +13,7 @@ const bodySchema = z.object({
 export async function POST(req: NextRequest, ctx: any) {
   try {
     const raw = ctx?.params;
-    const params = raw && typeof raw.then === "function" ? await raw : raw;
+    const params = raw && typeof raw?.then === "function" ? await raw : raw;
     const postId = params?.postId as string;
 
     if (!postId) {
