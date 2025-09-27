@@ -1,78 +1,58 @@
-import { NextResponse } from "next/server";
-// caminho relativo: from app/api/posts/[postId]/like -> app/lib/prisma
-import { prisma } from "../../../../lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma"; // se o alias falhar, troque para "../../../lib/prisma"
+import { z } from "zod";
 
-function bad(msg: string, status = 400) {
-  return NextResponse.json({ ok: false, error: msg }, { status });
-}
+const bodySchema = z.object({
+  userId: z.string().min(1, "userId obrigatório"),
+});
 
+/**
+ * Next 15: context.params pode ser Promise<{ postId: string }>.
+ * Precisamos aguardar para extrair o postId com segurança.
+ */
 export async function POST(
-  req: Request,
-  { params }: { params: { postId: string } }
+  req: NextRequest,
+  ctx: { params: Promise<{ postId: string }> }
 ) {
   try {
-    const postId = (params.postId || "").trim();
-    const { userId } = await req.json();
+    const { postId } = await ctx.params;
 
-    if (!postId) return bad("postId obrigatório");
-    if (!userId) return bad("userId obrigatório");
+    const json = await req.json().catch(() => ({}));
+    const parsed = bodySchema.safeParse(json);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { ok: false, error: "Parâmetros inválidos" },
+        { status: 400 }
+      );
+    }
 
-    // 1) valida existência do post
-    const post = await prisma.post.findUnique({ where: { id: postId } });
-    if (!post) return bad("post não encontrado", 404);
+    const { userId } = parsed.data;
 
-    // 2) checa se já existe like (chave composta única)
     const existing = await prisma.postLike.findUnique({
-      where: { postId_userId: { postId, userId } },
+      where: { userId_postId: { userId, postId } },
     });
 
-    let toggled: "liked" | "unliked";
+    let action: "liked" | "unliked";
     if (existing) {
-      // remove (toggle off)
-      await prisma.postLike.delete({
-        where: { id: existing.id },
-      });
-      toggled = "unliked";
+      await prisma.postLike.delete({ where: { id: existing.id } });
+      action = "unliked";
     } else {
-      // cria (toggle on)
-      await prisma.postLike.create({
-        data: { postId, userId },
-      });
-      toggled = "liked";
+      await prisma.postLike.create({ data: { userId, postId } });
+      action = "liked";
     }
 
     const count = await prisma.postLike.count({ where: { postId } });
 
-    return NextResponse.json({ ok: true, action: toggled, postId, userId, count });
-  } catch (e: any) {
-    console.error("POST /posts/[postId]/like error:", e);
+    return NextResponse.json({
+      ok: true,
+      action,
+      postId,
+      userId,
+      count,
+    });
+  } catch (err: any) {
     return NextResponse.json(
-      { ok: false, error: "Falha ao processar like", detail: String(e?.message ?? e) },
-      { status: 500 }
-    );
-  }
-}
-
-// opcional: DELETE explícito (unlike idempotente)
-export async function DELETE(
-  req: Request,
-  { params }: { params: { postId: string } }
-) {
-  try {
-    const postId = (params.postId || "").trim();
-    const { userId } = await req.json();
-
-    if (!postId) return bad("postId obrigatório");
-    if (!userId) return bad("userId obrigatório");
-
-    await prisma.postLike.deleteMany({ where: { postId, userId } });
-    const count = await prisma.postLike.count({ where: { postId } });
-
-    return NextResponse.json({ ok: true, action: "unliked", postId, userId, count });
-  } catch (e: any) {
-    console.error("DELETE /posts/[postId]/like error:", e);
-    return NextResponse.json(
-      { ok: false, error: "Falha ao remover like", detail: String(e?.message ?? e) },
+      { ok: false, error: err?.message ?? "Erro interno" },
       { status: 500 }
     );
   }
