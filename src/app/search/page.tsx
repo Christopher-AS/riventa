@@ -2,7 +2,14 @@
 
 import { FormEvent, useCallback, useState } from "react";
 
-type ApiOk = { ok: true; model: string; answer: string; usage?: unknown; retries: number; ms: number };
+type ApiOk = {
+  ok: true;
+  model: string;
+  answer: string;
+  usage?: unknown;
+  retries: number;
+  ms: number;
+};
 type ApiErr = { ok: false; error: string; retries?: number };
 
 const MODELS = ["gpt-4o-mini", "gpt-4.1-mini", "gpt-4o", "gpt-4.1"] as const;
@@ -65,7 +72,11 @@ export default function SearchPage() {
   };
 
   const handleCopy = useCallback(async () => {
-    if (!result?.answer || typeof navigator === "undefined" || !navigator.clipboard) {
+    if (
+      !result?.answer ||
+      typeof navigator === "undefined" ||
+      !navigator.clipboard
+    ) {
       return;
     }
 
@@ -98,7 +109,9 @@ export default function SearchPage() {
             disabled={loading}
             name="q"
           />
-          <p className="text-right text-xs text-gray-500">{promptLength} caracteres</p>
+          <p className="text-right text-xs text-gray-500">
+            {promptLength} caracteres
+          </p>
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -156,7 +169,9 @@ export default function SearchPage() {
               Tentativas: {result.retries} · {result.ms} ms
             </span>
           </header>
-          <pre className="whitespace-pre-wrap text-sm leading-relaxed text-gray-900">{result.answer}</pre>
+          <pre className="whitespace-pre-wrap text-sm leading-relaxed text-gray-900">
+            {result.answer}
+          </pre>
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -165,7 +180,9 @@ export default function SearchPage() {
             >
               Copiar resposta
             </button>
-            {copyFeedback && <span className="text-xs text-gray-500">{copyFeedback}</span>}
+            {copyFeedback && (
+              <span className="text-xs text-gray-500">{copyFeedback}</span>
+            )}
           </div>
         </section>
       )}

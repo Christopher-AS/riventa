@@ -5,7 +5,11 @@ export async function getNews() {
 }
 
 export async function toggleLike(newsId: string, userId: string) {
-  const s = await (await fetch(`/api/likes?newsId=${newsId}&userId=${userId}`, { cache: "no-store" })).json();
+  const s = await (
+    await fetch(`/api/likes?newsId=${newsId}&userId=${userId}`, {
+      cache: "no-store",
+    })
+  ).json();
   const liked = s.likedByUser;
   const r = await fetch("/api/likes", {
     method: liked ? "DELETE" : "POST",
@@ -17,12 +21,18 @@ export async function toggleLike(newsId: string, userId: string) {
 }
 
 export async function getComments(newsId: string) {
-  const r = await fetch(`/api/comments?newsId=${newsId}`, { cache: "no-store" });
+  const r = await fetch(`/api/comments?newsId=${newsId}`, {
+    cache: "no-store",
+  });
   if (!r.ok) throw new Error("Falha ao carregar comentários");
   return r.json();
 }
 
-export async function postComment(params: { newsId: string; userId: string; content: string }) {
+export async function postComment(params: {
+  newsId: string;
+  userId: string;
+  content: string;
+}) {
   const r = await fetch("/api/comments", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

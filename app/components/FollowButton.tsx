@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 type Props = {
   targetUserId: string; // usuário que será seguido (perfil)
-  viewerId: string;     // usuário logado (Alice, por enquanto)
+  viewerId: string; // usuário logado (Alice, por enquanto)
 };
 
 export default function FollowButton({ targetUserId, viewerId }: Props) {

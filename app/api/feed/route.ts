@@ -18,7 +18,11 @@ export async function GET(req: NextRequest) {
     const parsed = querySchema.safeParse(params);
     if (!parsed.success) {
       return NextResponse.json(
-        { ok: false, error: "Parâmetros inválidos", issues: parsed.error.flatten() },
+        {
+          ok: false,
+          error: "Parâmetros inválidos",
+          issues: parsed.error.flatten(),
+        },
         { status: 400 }
       );
     }

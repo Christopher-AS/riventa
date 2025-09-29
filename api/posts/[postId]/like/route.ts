@@ -15,7 +15,10 @@ export async function POST(
     });
 
     if (!post) {
-      return NextResponse.json({ error: "post não encontrado" }, { status: 404 });
+      return NextResponse.json(
+        { error: "post não encontrado" },
+        { status: 404 }
+      );
     }
 
     // verifica se já existe like

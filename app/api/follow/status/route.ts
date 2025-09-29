@@ -31,11 +31,13 @@ export async function GET(req: Request) {
     if (!followingId) return bad("followingId é obrigatório");
 
     const [followersCount, followingCount, isFollowing] = await Promise.all([
-      prisma.follow.count({ where: { followingId } }),             // quantos seguem B
+      prisma.follow.count({ where: { followingId } }), // quantos seguem B
       prisma.follow.count({ where: { followerId: followingId } }), // quantos B segue
       followerId
         ? prisma.follow
-            .findUnique({ where: { followerId_followingId: { followerId, followingId } } })
+            .findUnique({
+              where: { followerId_followingId: { followerId, followingId } },
+            })
             .then((x) => Boolean(x))
         : Promise.resolve(null),
     ]);
@@ -53,7 +55,11 @@ export async function GET(req: Request) {
   } catch (e: any) {
     console.error("GET /api/follow/status error:", e);
     return NextResponse.json(
-      { ok: false, error: "Falha ao ler status", detail: String(e?.message ?? e) },
+      {
+        ok: false,
+        error: "Falha ao ler status",
+        detail: String(e?.message ?? e),
+      },
       { status: 500 }
     );
   }

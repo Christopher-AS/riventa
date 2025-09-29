@@ -6,9 +6,9 @@ export default async function NewsPage() {
       <h1 className="text-2xl font-bold">Notícias</h1>
 
       <p className="text-gray-600">
-        Área de notícias (beta). Aqui vamos listar matérias e transmissões ao vivo
-        curadas, com fonte e data, e mais tarde vamos integrar com IA para resumo
-        e debate em tempo real.
+        Área de notícias (beta). Aqui vamos listar matérias e transmissões ao
+        vivo curadas, com fonte e data, e mais tarde vamos integrar com IA para
+        resumo e debate em tempo real.
       </p>
 
       <div className="rounded-2xl border border-gray-200 bg-white p-4 text-sm text-gray-500">

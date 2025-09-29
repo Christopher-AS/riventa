@@ -30,15 +30,35 @@ export default async function RootLayout({
             </Link>
 
             <div className="flex items-center gap-4 text-sm">
-              <Link href="/news" className="hover:underline">Notícias</Link>
-              <Link href="/search" className="hover:underline">Pesquisa</Link>
-              <Link href="/" className="hover:underline">Feed</Link>
+              <Link href="/news" className="hover:underline">
+                Notícias
+              </Link>
+              <Link href="/search" className="hover:underline">
+                Pesquisa
+              </Link>
+              <Link href="/" className="hover:underline">
+                Feed
+              </Link>
 
               {viewerId ? (
                 <>
-                  <Link href={`/u/${viewerId}`} className="hover:underline">Perfil</Link>
-                  <Link href={`/u/${viewerId}/followers`} className="hover:underline" title="Ver seguidores">Seguidores</Link>
-                  <Link href={`/u/${viewerId}/following`} className="hover:underline" title="Ver quem sigo">Seguindo</Link>
+                  <Link href={`/u/${viewerId}`} className="hover:underline">
+                    Perfil
+                  </Link>
+                  <Link
+                    href={`/u/${viewerId}/followers`}
+                    className="hover:underline"
+                    title="Ver seguidores"
+                  >
+                    Seguidores
+                  </Link>
+                  <Link
+                    href={`/u/${viewerId}/following`}
+                    className="hover:underline"
+                    title="Ver quem sigo"
+                  >
+                    Seguindo
+                  </Link>
                 </>
               ) : (
                 <span className="text-gray-400">Usuário de teste ausente</span>

@@ -1,29 +1,17 @@
-// app/api/comments/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-/**
- * GET /api/comments?newsId=...
- * Lista comentários da notícia (ordenados por createdAt ASC)
- */
-export async function GET(req: NextRequest) {
+export async function GET(req: Request) {
   try {
-    const url = new URL(req.url);
-    const newsId = url.searchParams.get("newsId");
-
+    const { searchParams } = new URL(req.url);
+    const newsId = searchParams.get("newsId");
     if (!newsId) {
-      return NextResponse.json(
-        { error: "newsId é obrigatório" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "newsId é obrigatório" }, { status: 400 });
     }
 
     const comments = await prisma.comment.findMany({
       where: { newsId },
-      include: {
-        // nomes das relações conforme seu schema.prisma
-        User: { include: { profile: true } },
-      },
+      include: { author: { include: { profile: true } } },
       orderBy: { createdAt: "asc" },
     });
 
@@ -34,15 +22,12 @@ export async function GET(req: NextRequest) {
   }
 }
 
-/**
- * POST /api/comments
- * body: { newsId: string, userId: string, content: string }
- */
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const body = await req.json().catch(() => ({}) as any);
+    const body = await req.json();
+
     const newsId: string | undefined = body.newsId;
-    const userId: string | undefined = body.userId; // id do autor
+    const userId: string | undefined = body.userId; // vem como userId do cliente
     const content: string | undefined = body.content;
 
     if (!newsId || !userId || !content?.trim()) {
@@ -54,15 +39,11 @@ export async function POST(req: NextRequest) {
 
     const comment = await prisma.comment.create({
       data: {
-        // seu schema exige id manual (String @id), então geramos aqui
-        id: crypto.randomUUID(),
         newsId,
-        authorId: userId, // campo correto no schema
+        authorId: userId,              // <-- mapeia para o campo correto no schema
         content: content.trim(),
       },
-      include: {
-        User: { include: { profile: true } },
-      },
+      include: { author: { include: { profile: true } } },
     });
 
     return NextResponse.json(comment);

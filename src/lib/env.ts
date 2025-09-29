@@ -1,21 +1,8 @@
-import { z } from "zod";
-
-const envSchema = z.object({
-  OPENAI_API_KEY: z.string().min(1, "OPENAI_API_KEY is required"),
-  COMMIT_SHA: z.string().default("dev"),
-});
-
-const parsed = envSchema.safeParse({
-  OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-  COMMIT_SHA: process.env.COMMIT_SHA,
-});
-
-if (!parsed.success) {
-  const message = parsed.error.errors
-    .map((issue) => `${issue.path.join(".") || "environment"}: ${issue.message}`)
-    .join("; ");
-
-  throw new Error(`Invalid environment variables: ${message}`);
-}
-
-export const env = parsed.data;
+// src/lib/env.ts
+export const env = {
+  NODE_ENV: process.env.NODE_ENV ?? "development",
+  DATABASE_URL: process.env.DATABASE_URL ?? "",
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY ?? "",
+  NEXT_PUBLIC_APP_URL:
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+};

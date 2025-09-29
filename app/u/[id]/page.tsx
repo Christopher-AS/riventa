@@ -4,11 +4,7 @@ import { prisma } from "@/lib/prisma"; // se o alias falhar, use "../../../lib/p
 
 export const dynamic = "force-dynamic";
 
-export default async function Page({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function Page({ params }: { params: { id: string } }) {
   // Usuária "logada" para POC
   const viewerEmail = "alice@demo.com";
 

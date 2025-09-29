@@ -58,7 +58,11 @@ export async function GET(req: Request) {
   } catch (e: any) {
     console.error("GET /api/followers error:", e);
     return NextResponse.json(
-      { ok: false, error: "Falha ao listar seguidores", detail: String(e?.message ?? e) },
+      {
+        ok: false,
+        error: "Falha ao listar seguidores",
+        detail: String(e?.message ?? e),
+      },
       { status: 500 }
     );
   }

@@ -14,7 +14,8 @@ export async function POST(req: Request) {
   try {
     const { followerId, followingId } = await req.json();
 
-    if (!followerId || !followingId) return bad("followerId e followingId são obrigatórios");
+    if (!followerId || !followingId)
+      return bad("followerId e followingId são obrigatórios");
     if (followerId === followingId) return bad("não pode seguir a si mesmo");
 
     // valida usuários (opcional, mas ajuda a depurar)
@@ -41,11 +42,21 @@ export async function POST(req: Request) {
 
     const count = await prisma.follow.count({ where: { followingId } }); // seguidores desse following
 
-    return NextResponse.json({ ok: true, action, followerId, followingId, count });
+    return NextResponse.json({
+      ok: true,
+      action,
+      followerId,
+      followingId,
+      count,
+    });
   } catch (e: any) {
     console.error("POST /api/follow error:", e);
     return NextResponse.json(
-      { ok: false, error: "Falha ao processar follow", detail: String(e?.message ?? e) },
+      {
+        ok: false,
+        error: "Falha ao processar follow",
+        detail: String(e?.message ?? e),
+      },
       { status: 500 }
     );
   }
@@ -58,16 +69,27 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const { followerId, followingId } = await req.json();
-    if (!followerId || !followingId) return bad("followerId e followingId são obrigatórios");
+    if (!followerId || !followingId)
+      return bad("followerId e followingId são obrigatórios");
 
     await prisma.follow.deleteMany({ where: { followerId, followingId } });
     const count = await prisma.follow.count({ where: { followingId } });
 
-    return NextResponse.json({ ok: true, action: "unfollowed", followerId, followingId, count });
+    return NextResponse.json({
+      ok: true,
+      action: "unfollowed",
+      followerId,
+      followingId,
+      count,
+    });
   } catch (e: any) {
     console.error("DELETE /api/follow error:", e);
     return NextResponse.json(
-      { ok: false, error: "Falha ao remover follow", detail: String(e?.message ?? e) },
+      {
+        ok: false,
+        error: "Falha ao remover follow",
+        detail: String(e?.message ?? e),
+      },
       { status: 500 }
     );
   }

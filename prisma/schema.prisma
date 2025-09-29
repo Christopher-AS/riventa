@@ -1,3 +1,4 @@
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,19 +8,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/** ====== USER & PROFILE ====== **/
+/**
+ * * ====== USER & PROFILE ====== **
+ */
 model User {
-  id         String       @id @default(uuid()) @map("id")
-  email      String       @unique @map("email")
-  password   String       @map("password")
-  createdAt  DateTime     @default(now()) @map("createdAt")
+  id        String   @id @default(uuid()) @map("id")
+  email     String   @unique @map("email")
+  password  String   @map("password")
+  createdAt DateTime @default(now()) @map("createdAt")
 
-  // relações ativas do social
-  profile    UserProfile?
-  posts      Post[]
-  postLikes  PostLike[]
-  following  Follow[]     @relation("follows_as_follower")
-  followers  Follow[]     @relation("follows_as_following")
+  // relações
+  profile            UserProfile?
+  posts              Post[]
+  postLikes          PostLike[]
+  followsAsFollower  Follow[]     @relation("follows_as_follower")
+  followsAsFollowing Follow[]     @relation("follows_as_following")
+
+  // social com News
+  comments Comment[]
+  likes    Like[]
+  News     News[]
 
   @@map("User")
 }
@@ -27,23 +35,26 @@ model User {
 model UserProfile {
   id        String  @id @default(uuid()) @map("id")
   userId    String  @unique @map("userId")
-  user      User    @relation(fields: [userId], references: [id])
   name      String? @map("name")
   bio       String? @map("bio")
   avatarUrl String? @map("avatarUrl")
 
+  user User @relation(fields: [userId], references: [id])
+
   @@map("UserProfile")
 }
 
-/** ====== SOCIAL: POST / LIKE / FOLLOW ====== **/
+/**
+ * * ====== SOCIAL: POST / LIKE / FOLLOW ====== **
+ */
 model Post {
-  id        String    @id @default(uuid()) @map("id")
-  authorId  String    @map("authorId")
-  author    User      @relation(fields: [authorId], references: [id])
-  content   String    @map("content")
-  createdAt DateTime  @default(now()) @map("createdAt")
+  id        String   @id @default(uuid()) @map("id")
+  authorId  String   @map("authorId")
+  content   String   @map("content")
+  createdAt DateTime @default(now()) @map("createdAt")
 
-  likes     PostLike[]
+  author User       @relation(fields: [authorId], references: [id])
+  likes  PostLike[]
 
   @@map("Post")
 }
@@ -51,12 +62,12 @@ model Post {
 model PostLike {
   id        String   @id @default(uuid()) @map("id")
   postId    String   @map("postId")
-  post      Post     @relation(fields: [postId], references: [id])
   userId    String   @map("userId")
-  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now()) @map("createdAt")
+  post      Post     @relation(fields: [postId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
-  @@unique([postId, userId])
+  @@unique([userId, postId]) // <— ESTA LINHA
   @@map("PostLike")
 }
 
@@ -66,9 +77,55 @@ model Follow {
   followingId String   @map("followingId")
   createdAt   DateTime @default(now()) @map("createdAt")
 
-  follower    User     @relation("follows_as_follower", fields: [followerId], references: [id])
-  following   User     @relation("follows_as_following", fields: [followingId], references: [id])
+  follower  User @relation("follows_as_follower", fields: [followerId], references: [id])
+  following User @relation("follows_as_following", fields: [followingId], references: [id])
 
   @@unique([followerId, followingId])
   @@map("Follow")
+}
+
+/**
+ * * ====== NEWS + COMMENT + LIKE (para /api/news) ====== **
+ */
+model Comment {
+  id        String   @id @default(uuid()) @map("id")
+  content   String   @map("content")
+  createdAt DateTime @default(now()) @map("createdAt")
+
+  authorId String @map("authorId")
+  newsId   String @map("newsId")
+
+  User User @relation(fields: [authorId], references: [id])
+  News News @relation(fields: [newsId], references: [id])
+
+  @@map("Comment")
+}
+
+model Like {
+  id        String   @id @default(uuid()) @map("id")
+  userId    String   @map("userId")
+  newsId    String   @map("newsId")
+  createdAt DateTime @default(now()) @map("createdAt")
+
+  User User @relation(fields: [userId], references: [id])
+  News News @relation(fields: [newsId], references: [id])
+
+  @@unique([userId, newsId])
+  @@map("Like")
+}
+
+model News {
+  id        String   @id @default(uuid()) @map("id")
+  title     String   @map("title")
+  content   String   @map("content")
+  createdAt DateTime @default(now()) @map("createdAt")
+
+  authorId String @map("authorId")
+
+  // relações
+  User    User      @relation(fields: [authorId], references: [id]) // <— relação com nome "User"
+  Comment Comment[]
+  Like    Like[]
+
+  @@map("News")
 }
