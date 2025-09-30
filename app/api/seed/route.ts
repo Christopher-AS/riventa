@@ -46,8 +46,8 @@ export async function POST(request: Request) {
     });
     await prisma.post.createMany({
       data: [
-        { authorId: alice.id, content: 'Deploy do Riventa concluido!', published: true },
-        { authorId: bob.id, content: 'Trabalhando em novo design', published: true }
+        { authorId: alice.id, content: 'Deploy do Riventa concluido!' },
+        { authorId: bob.id, content: 'Trabalhando em novo design' }
       ]
     });
     const stats = { users: await prisma.user.count(), posts: await prisma.post.count(), follows: await prisma.follow.count() };
