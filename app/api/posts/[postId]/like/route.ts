@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "../../../lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(
   request: NextRequest,
@@ -78,7 +78,7 @@ export async function POST(
       {
         ok: false,
         error: "Falha ao processar like",
-        detail: String(error?.message ?? error),
+        detail: String((error as any)?.message ?? error),
       },
       { status: 500 }
     );
