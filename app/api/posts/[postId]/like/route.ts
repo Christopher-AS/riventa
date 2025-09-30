@@ -1,53 +1,69 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma"; // se o alias falhar, troque para "../../../lib/prisma"
-import { z } from "zod";
+import { prisma } from "../../../lib/prisma";
 
-const bodySchema = z.object({
-  userId: z.string().min(1, "userId obrigatório"),
-});
-
-/**
- * Compatível com Next 15: "context.params" pode vir como Promise.
- * Tipamos "ctx" como any e normalizamos para aceitar Promise ou objeto.
- */
-export async function POST(req: NextRequest, ctx: any) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ postId: string }> }
+) {
   try {
-    const raw = ctx?.params;
-    const params = raw && typeof raw?.then === "function" ? await raw : raw;
-    const postId = params?.postId as string;
+    // Await params no Next.js 15
+    const { postId } = await params;
+    
+    const body = await request.json();
+    const { userId } = body;
+
+    if (!userId) {
+      return NextResponse.json(
+        { ok: false, error: "userId obrigatório" },
+        { status: 400 }
+      );
+    }
 
     if (!postId) {
       return NextResponse.json(
-        { ok: false, error: "postId ausente nos parâmetros" },
+        { ok: false, error: "postId obrigatório" },
         { status: 400 }
       );
     }
 
-    const json = await req.json().catch(() => ({}));
-    const parsed = bodySchema.safeParse(json);
-    if (!parsed.success) {
-      return NextResponse.json(
-        { ok: false, error: "Parâmetros inválidos" },
-        { status: 400 }
-      );
-    }
-
-    const { userId } = parsed.data;
-
-    const existing = await prisma.postLike.findUnique({
-      where: { userId_postId: { userId, postId } },
+    // Verificar se já existe like
+    const existingLike = await prisma.postLike.findUnique({
+      where: {
+        userId_postId: {
+          userId,
+          postId,
+        },
+      },
     });
 
     let action: "liked" | "unliked";
-    if (existing) {
-      await prisma.postLike.delete({ where: { id: existing.id } });
+
+    if (existingLike) {
+      // Remover like
+      await prisma.postLike.delete({
+        where: {
+          userId_postId: {
+            userId,
+            postId,
+          },
+        },
+      });
       action = "unliked";
     } else {
-      await prisma.postLike.create({ data: { userId, postId } });
+      // Adicionar like
+      await prisma.postLike.create({
+        data: {
+          userId,
+          postId,
+        },
+      });
       action = "liked";
     }
 
-    const count = await prisma.postLike.count({ where: { postId } });
+    // Contar total de likes
+    const count = await prisma.postLike.count({
+      where: { postId },
+    });
 
     return NextResponse.json({
       ok: true,
@@ -56,9 +72,14 @@ export async function POST(req: NextRequest, ctx: any) {
       userId,
       count,
     });
-  } catch (err: any) {
+  } catch (error) {
+    console.error("POST /api/posts/[postId]/like error:", error);
     return NextResponse.json(
-      { ok: false, error: err?.message ?? "Erro interno" },
+      {
+        ok: false,
+        error: "Falha ao processar like",
+        detail: String(error?.message ?? error),
+      },
       { status: 500 }
     );
   }
