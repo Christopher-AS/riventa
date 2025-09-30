@@ -76,3 +76,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Seed failed', details: error.message }, { status: 500 });
   }
 }
+# Seed endpoint
