@@ -15,11 +15,44 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Database already seeded', existingUsers: userCount });
     }
     const hashedPassword = await hash('demo123', 10);
-    const alice = await prisma.user.create({ data: { email: 'alice@demo.com', name: 'Alice Santos', password: hashedPassword, emailVerified: new Date(), profile: { create: { bio: 'Dev Full Stack' } } } });
-    const bob = await prisma.user.create({ data: { email: 'bob@demo.com', name: 'Bob Silva', password: hashedPassword, emailVerified: new Date(), profile: { create: { bio: 'Designer UI/UX' } } } });
-    const carol = await prisma.user.create({ data: { email: 'carol@demo.com', name: 'Carol Oliveira', password: hashedPassword, emailVerified: new Date(), profile: { create: { bio: 'Product Manager' } } } });
-    await prisma.follow.createMany({ data: [{ followerId: alice.id, followingId: bob.id }, { followerId: alice.id, followingId: carol.id }, { followerId: bob.id, followingId: alice.id }, { followerId: carol.id, followingId: alice.id }] });
-    await prisma.post.createMany({ data: [{ userId: alice.id, content: 'Deploy do Riventa!', published: true }, { userId: bob.id, content: 'Novo design', published: true }] });
+    const alice = await prisma.user.create({
+      data: {
+        email: 'alice@demo.com',
+        password: hashedPassword,
+        emailVerified: new Date(),
+        profile: { create: { bio: 'Desenvolvedora Full Stack - Alice Santos' } }
+      }
+    });
+    const bob = await prisma.user.create({
+      data: {
+        email: 'bob@demo.com',
+        password: hashedPassword,
+        emailVerified: new Date(),
+        profile: { create: { bio: 'Designer UI/UX - Bob Silva' } }
+      }
+    });
+    const carol = await prisma.user.create({
+      data: {
+        email: 'carol@demo.com',
+        password: hashedPassword,
+        emailVerified: new Date(),
+        profile: { create: { bio: 'Product Manager - Carol Oliveira' } }
+      }
+    });
+    await prisma.follow.createMany({
+      data: [
+        { followerId: alice.id, followingId: bob.id },
+        { followerId: alice.id, followingId: carol.id },
+        { followerId: bob.id, followingId: alice.id },
+        { followerId: carol.id, followingId: alice.id }
+      ]
+    });
+    await prisma.post.createMany({
+      data: [
+        { userId: alice.id, content: 'Deploy do Riventa concluido!', published: true },
+        { userId: bob.id, content: 'Trabalhando em novo design', published: true }
+      ]
+    });
     const stats = { users: await prisma.user.count(), posts: await prisma.post.count(), follows: await prisma.follow.count() };
     return NextResponse.json({ success: true, message: 'Database seeded!', stats });
   } catch (error: any) {
