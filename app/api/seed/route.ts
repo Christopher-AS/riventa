@@ -19,7 +19,6 @@ export async function POST(request: Request) {
       data: {
         email: 'alice@demo.com',
         password: hashedPassword,
-        emailVerified: new Date(),
         profile: { create: { bio: 'Desenvolvedora Full Stack - Alice Santos' } }
       }
     });
@@ -27,7 +26,6 @@ export async function POST(request: Request) {
       data: {
         email: 'bob@demo.com',
         password: hashedPassword,
-        emailVerified: new Date(),
         profile: { create: { bio: 'Designer UI/UX - Bob Silva' } }
       }
     });
@@ -35,7 +33,6 @@ export async function POST(request: Request) {
       data: {
         email: 'carol@demo.com',
         password: hashedPassword,
-        emailVerified: new Date(),
         profile: { create: { bio: 'Product Manager - Carol Oliveira' } }
       }
     });
