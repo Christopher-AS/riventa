@@ -36,9 +36,7 @@ export async function POST(request: Request) {
         emailVerified: new Date(),
         profile: {
           create: {
-            bio: 'Desenvolvedora Full Stack apaixonada por tecnologia e inovação 🚀',
-            location: 'São Paulo, SP',
-            website: 'https://alice.dev'
+            bio: 'Desenvolvedora Full Stack apaixonada por tecnologia e inovação'
           }
         }
       }
@@ -52,8 +50,7 @@ export async function POST(request: Request) {
         emailVerified: new Date(),
         profile: {
           create: {
-            bio: 'Designer UI/UX | Criando experiências incríveis',
-            location: 'Rio de Janeiro, RJ'
+            bio: 'Designer UI/UX | Criando experiências incríveis'
           }
         }
       }
@@ -67,8 +64,7 @@ export async function POST(request: Request) {
         emailVerified: new Date(),
         profile: {
           create: {
-            bio: 'Product Manager | Tech enthusiast | Coffee lover ☕',
-            location: 'Curitiba, PR'
+            bio: 'Product Manager | Tech enthusiast | Coffee lover'
           }
         }
       }
@@ -89,7 +85,7 @@ export async function POST(request: Request) {
       data: [
         {
           userId: alice.id,
-          content: 'Acabei de fazer deploy do Riventa! 🎉 Próxima social network está no ar!',
+          content: 'Acabei de fazer deploy do Riventa! Próxima social network está no ar!',
           published: true
         },
         {
@@ -99,12 +95,12 @@ export async function POST(request: Request) {
         },
         {
           userId: carol.id,
-          content: 'Reflexão do dia: O melhor código é aquele que você não precisa escrever 💡',
+          content: 'Reflexão do dia: O melhor código é aquele que você não precisa escrever',
           published: true
         },
         {
           userId: alice.id,
-          content: 'Estudando Next.js 15 e estou impressionada com o Turbopack! Velocidade absurda 🚄',
+          content: 'Estudando Next.js 15 e estou impressionada com o Turbopack! Velocidade absurda',
           published: true
         }
       ]
@@ -152,7 +148,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Database seeded successfully! 🌱',
+      message: 'Database seeded successfully!',
       stats
     });
 
