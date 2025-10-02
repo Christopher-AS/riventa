@@ -27,7 +27,7 @@ export async function POST(
     }
 
     // Verificar se já existe like
-    const existingLike = await prisma.postLike.findUnique({
+    const existingLike = await prisma.like.findUnique({
       where: {
         userId_postId: {
           userId,
@@ -40,7 +40,7 @@ export async function POST(
 
     if (existingLike) {
       // Remover like
-      await prisma.postLike.delete({
+      await prisma.like.delete({
         where: {
           userId_postId: {
             userId,
@@ -51,7 +51,7 @@ export async function POST(
       action = "unliked";
     } else {
       // Adicionar like
-      await prisma.postLike.create({
+      await prisma.like.create({
         data: {
           userId,
           postId,
@@ -61,7 +61,7 @@ export async function POST(
     }
 
     // Contar total de likes
-    const count = await prisma.postLike.count({
+    const count = await prisma.like.count({
       where: { postId },
     });
 
