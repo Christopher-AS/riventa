@@ -1,52 +1,56 @@
-// app/api/likes/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { z } from "zod";
 
-/**
- * POST /api/likes
- * Body: { newsId: string, userId: string }
- * Alterna like/unlike e retorna o total de likes da notícia.
- */
-export async function POST(req: NextRequest) {
+const bodySchema = z.object({
+  userId: z.string().min(1, "userId obrigatório"),
+  postId: z.string().min(1, "postId obrigatório"),
+});
+
+// GET /api/likes?postId=&viewerId=
+// Retorna contagem e se o viewer curtiu.
+export async function GET(req: NextRequest) {
   try {
-    const body = await req.json().catch(() => ({}) as any);
-    const newsId: string | undefined = body.newsId;
-    const userId: string | undefined = body.userId;
+    const postId = req.nextUrl.searchParams.get("postId");
+    const viewerId = req.nextUrl.searchParams.get("viewerId") || undefined;
 
-    if (!newsId || !userId) {
-      return NextResponse.json(
-        { error: "newsId e userId são obrigatórios" },
-        { status: 400 }
-      );
+    if (!postId) {
+      return NextResponse.json({ ok: false, error: "postId obrigatório" }, { status: 400 });
     }
 
-    // Se houver like, remove (unlike); se não houver, cria (like).
-    const existing = await prisma.like.findUnique({
-      where: { userId_newsId: { userId, newsId } }, // precisa do @@unique([userId, newsId]) no schema
+    const [likeCount, viewerLike] = await Promise.all([
+      prisma.like.count({ where: { postId } }),
+      viewerId ? prisma.like.findFirst({ where: { postId, userId: viewerId } }) : Promise.resolve(null),
+    ]);
+
+    return NextResponse.json({ ok: true, likeCount, viewerHasLiked: !!viewerLike });
+  } catch (err: any) {
+    console.error("GET /api/likes error:", err);
+    return NextResponse.json({ ok: false, error: err?.message ?? "erro inesperado" }, { status: 500 });
+  }
+}
+
+// POST /api/likes  { userId, postId }
+// Alterna like/unlike sem depender de índice composto.
+export async function POST(req: NextRequest) {
+  try {
+    const data = bodySchema.parse(await req.json());
+
+    const existing = await prisma.like.findFirst({
+      where: { userId: data.userId, postId: data.postId },
     });
 
     if (existing) {
       await prisma.like.delete({ where: { id: existing.id } });
-      const count = await prisma.like.count({ where: { newsId } });
-      return NextResponse.json({ liked: false, count });
+      const likeCount = await prisma.like.count({ where: { postId: data.postId } });
+      return NextResponse.json({ ok: true, liked: false, likeCount });
     } else {
-      await prisma.like.create({
-        data: {
-          id: crypto.randomUUID(), // id é String @id no seu schema
-          // Usamos as relações exigidas pelo LikeCreateInput
-          News: { connect: { id: newsId } },
-          User: { connect: { id: userId } },
-        },
-      });
-
-      const count = await prisma.like.count({ where: { newsId } });
-      return NextResponse.json({ liked: true, count });
+      await prisma.like.create({ data: { userId: data.userId, postId: data.postId } });
+      const likeCount = await prisma.like.count({ where: { postId: data.postId } });
+      return NextResponse.json({ ok: true, liked: true, likeCount });
     }
-  } catch (error: any) {
-    console.error("POST /api/likes erro:", error);
-    return NextResponse.json(
-      { error: "Erro interno", detail: error?.message ?? null },
-      { status: 500 }
-    );
+  } catch (err: any) {
+    console.error("POST /api/likes error:", err);
+    return NextResponse.json({ ok: false, error: err?.message ?? "erro inesperado" }, { status: 400 });
   }
 }
