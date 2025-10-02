@@ -1,73 +1,68 @@
+import { prisma } from "@/lib/prisma";
 import PostCard from "./components/PostCard";
-import NewPostForm from "./components/NewPostForm";
-import { prisma } from "@/lib/prisma"; // se o alias falhar, troque para "../lib/prisma"
 
 export const dynamic = "force-dynamic";
 
-type FeedItem = {
-  id: string;
-  content: string;
-  createdAt: string;
-  author: { id: string; email: string };
-  likeCount: number;
-  viewerHasLiked: boolean;
-};
-
-export default async function Page() {
-  // Para a POC, usamos a Alice como "usuária logada"
-  const viewerEmail = "alice@demo.com";
-  const viewer = await prisma.user.findUnique({
-    where: { email: viewerEmail },
-    select: { id: true, email: true },
+async function getPosts() {
+  const posts = await prisma.post.findMany({
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      likes: true,
+      comments: {
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
+      _count: {
+        select: {
+          likes: true,
+          comments: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
+  return posts;
+}
 
-  if (!viewer) {
-    return (
-      <main className="max-w-2xl mx-auto p-6">
-        <h1 className="text-xl font-semibold">Riventa</h1>
-        <p className="mt-4 text-red-600">
-          Usuária de teste não encontrada (alice@demo.com). Verifique o seed.
-        </p>
-      </main>
-    );
-  }
-
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const res = await fetch(`${base}/api/feed?userId=${viewer.id}&limit=20`, {
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    return (
-      <main className="max-w-2xl mx-auto p-6">
-        <h1 className="text-xl font-semibold">Riventa</h1>
-        <p className="mt-4 text-red-600">
-          Erro ao carregar o feed: {res.status} {res.statusText}
-        </p>
-      </main>
-    );
-  }
-
-  const data = (await res.json()) as { ok: boolean; items: FeedItem[] };
-  const items = data?.items ?? [];
+export default async function Home() {
+  const posts = await getPosts();
 
   return (
-    <main className="max-w-2xl mx-auto p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Feed (Alice)</h1>
-
-      {/* Formulário de novo post */}
-      <NewPostForm viewerId={viewer.id} />
-
-      {/* Lista do feed */}
-      {items.length === 0 ? (
-        <p className="text-gray-600">Nenhum post dos perfis que você segue.</p>
-      ) : (
-        <div className="space-y-4">
-          {items.map((post) => (
-            <PostCard key={post.id} post={post} viewerId={viewer.id} />
-          ))}
-        </div>
-      )}
-    </main>
+    <div className="max-w-2xl mx-auto py-8 px-4">
+      <h1 className="text-3xl font-bold mb-8 text-gray-800">Feed</h1>
+      
+      <div className="space-y-6">
+        {posts.map((post) => (
+          <PostCard key={post.id} post={post} />
+        ))}
+        
+        {posts.length === 0 && (
+          <div className="text-center py-12 bg-white rounded-lg shadow">
+            <p className="text-gray-500">Nenhuma publicação ainda.</p>
+            <p className="text-sm text-gray-400 mt-2">
+              Seja o primeiro a criar uma publicação!
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

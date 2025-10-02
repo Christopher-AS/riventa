@@ -1,49 +1,40 @@
-import { NextResponse } from "next/server";
-import { prisma } from "../../lib/prisma"; // <-- corrigido
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-export async function POST(req: Request) {
+// POST /api/posts
+// Cria um novo post
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { authorId, content } = body ?? {};
+    const { content, authorId, imageUrl } = body;
 
-    if (!authorId || typeof authorId !== "string") {
+    if (!content?.trim() || !authorId) {
       return NextResponse.json(
-        { error: "authorId obrigatório" },
+        { error: "content e authorId são obrigatórios" },
         { status: 400 }
-      );
-    }
-    if (
-      !content ||
-      typeof content !== "string" ||
-      content.trim().length === 0
-    ) {
-      return NextResponse.json(
-        { error: "content obrigatório" },
-        { status: 400 }
-      );
-    }
-
-    const author = await prisma.user.findUnique({
-      where: { id: authorId },
-      select: { id: true, email: true },
-    });
-    if (!author) {
-      return NextResponse.json(
-        { error: "authorId não encontrado" },
-        { status: 404 }
       );
     }
 
     const post = await prisma.post.create({
-      data: { authorId, content: content.trim() },
-      include: { author: { select: { id: true, email: true } } },
+      data: {
+        content: content.trim(),
+        authorId,
+        imageUrl: imageUrl || null,
+      },
+      include: {
+        author: {
+          include: {
+            profile: true,
+          },
+        },
+      },
     });
 
-    return NextResponse.json({ ok: true, post }, { status: 201 });
-  } catch (err: any) {
-    console.error("POST /api/posts error:", err?.message ?? err);
+    return NextResponse.json({ ok: true, post });
+  } catch (error: any) {
+    console.error("POST /api/posts error:", error);
     return NextResponse.json(
-      { error: "Falha ao criar post", detail: String(err?.message ?? err) },
+      { error: "Erro ao criar post", detail: error?.message },
       { status: 500 }
     );
   }
