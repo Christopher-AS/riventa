@@ -3,26 +3,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 /**
- * GET /api/comments?newsId=...
- * Lista comentários da notícia (ordenados por createdAt ASC)
+ * GET /api/comments?postId=...
+ * Lista comentários do post (ordenados por createdAt ASC)
  */
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
-    const newsId = url.searchParams.get("newsId");
+    const postId = url.searchParams.get("postId");
 
-    if (!newsId) {
+    if (!postId) {
       return NextResponse.json(
-        { error: "newsId é obrigatório" },
+        { error: "postId é obrigatório" },
         { status: 400 }
       );
     }
 
     const comments = await prisma.comment.findMany({
-      where: { newsId },
+      where: { postId },
       include: {
-        // nomes das relações conforme seu schema.prisma
-        User: { include: { profile: true } },
+        user: { include: { profile: true } },
       },
       orderBy: { createdAt: "asc" },
     });
@@ -36,32 +35,30 @@ export async function GET(req: NextRequest) {
 
 /**
  * POST /api/comments
- * body: { newsId: string, userId: string, content: string }
+ * body: { postId: string, userId: string, content: string }
  */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}) as any);
-    const newsId: string | undefined = body.newsId;
-    const userId: string | undefined = body.userId; // id do autor
+    const postId: string | undefined = body.postId;
+    const userId: string | undefined = body.userId;
     const content: string | undefined = body.content;
 
-    if (!newsId || !userId || !content?.trim()) {
+    if (!postId || !userId || !content?.trim()) {
       return NextResponse.json(
-        { error: "newsId, userId e content são obrigatórios" },
+        { error: "postId, userId e content são obrigatórios" },
         { status: 400 }
       );
     }
 
     const comment = await prisma.comment.create({
       data: {
-        // seu schema exige id manual (String @id), então geramos aqui
-        id: crypto.randomUUID(),
-        newsId,
-        authorId: userId, // campo correto no schema
+        postId,
+        userId,
         content: content.trim(),
       },
       include: {
-        User: { include: { profile: true } },
+        user: { include: { profile: true } },
       },
     });
 
