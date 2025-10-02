@@ -1,58 +1,136 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { hash } from 'bcrypt';
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
-const SEED_SECRET = process.env.SEED_SECRET || 'your-secret-key-change-me';
+const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   try {
+    // Verificar autenticação
     const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${SEED_SECRET}`) {
+    const token = authHeader?.replace('Bearer ', '');
+    
+    if (token !== process.env.SEED_SECRET) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const userCount = await prisma.user.count();
-    if (userCount > 0) {
-      return NextResponse.json({ message: 'Database already seeded', existingUsers: userCount });
-    }
-    const hashedPassword = await hash('demo123', 10);
+
+    const hashedPassword = await bcrypt.hash('demo123', 10);
+    const now = new Date();
+
+    // Criar usuários
     const alice = await prisma.user.create({
       data: {
         email: 'alice@demo.com',
         password: hashedPassword,
-        profile: { create: { bio: 'Desenvolvedora Full Stack - Alice Santos' } }
+        createdAt: now,
+        updatedAt: now,
+        profile: {
+          create: {
+            bio: 'Desenvolvedora Full Stack',
+            createdAt: now,
+            updatedAt: now,
+          }
+        }
       }
     });
+
     const bob = await prisma.user.create({
       data: {
         email: 'bob@demo.com',
         password: hashedPassword,
-        profile: { create: { bio: 'Designer UI/UX - Bob Silva' } }
+        createdAt: now,
+        updatedAt: now,
+        profile: {
+          create: {
+            bio: 'Designer UI/UX',
+            createdAt: now,
+            updatedAt: now,
+          }
+        }
       }
     });
+
     const carol = await prisma.user.create({
       data: {
         email: 'carol@demo.com',
         password: hashedPassword,
-        profile: { create: { bio: 'Product Manager - Carol Oliveira' } }
+        createdAt: now,
+        updatedAt: now,
+        profile: {
+          create: {
+            bio: 'Product Manager',
+            createdAt: now,
+            updatedAt: now,
+          }
+        }
       }
     });
-    await prisma.follow.createMany({
-      data: [
-        { followerId: alice.id, followingId: bob.id },
-        { followerId: alice.id, followingId: carol.id },
-        { followerId: bob.id, followingId: alice.id },
-        { followerId: carol.id, followingId: alice.id }
-      ]
+
+    // Criar posts
+    await prisma.post.create({
+      data: {
+        authorId: alice.id,
+        content: 'Deploy do Riventa concluído! 🚀',
+        createdAt: now,
+        updatedAt: now,
+      }
     });
-    await prisma.post.createMany({
-      data: [
-        { authorId: alice.id, content: 'Deploy do Riventa concluido!' },
-        { authorId: bob.id, content: 'Trabalhando em novo design' }
-      ]
+
+    await prisma.post.create({
+      data: {
+        authorId: bob.id,
+        content: 'Trabalhando em novo design para o feed',
+        createdAt: now,
+        updatedAt: now,
+      }
     });
-    const stats = { users: await prisma.user.count(), posts: await prisma.post.count(), follows: await prisma.follow.count() };
-    return NextResponse.json({ success: true, message: 'Database seeded!', stats });
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Seed failed', details: error.message }, { status: 500 });
+
+    // Criar relacionamentos
+    await prisma.follow.create({
+      data: {
+        followerId: alice.id,
+        followingId: bob.id,
+        createdAt: now,
+      }
+    });
+
+    await prisma.follow.create({
+      data: {
+        followerId: alice.id,
+        followingId: carol.id,
+        createdAt: now,
+      }
+    });
+
+    await prisma.follow.create({
+      data: {
+        followerId: bob.id,
+        followingId: alice.id,
+        createdAt: now,
+      }
+    });
+
+    await prisma.follow.create({
+      data: {
+        followerId: carol.id,
+        followingId: alice.id,
+        createdAt: now,
+      }
+    });
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Database seeded successfully',
+      users: 3,
+      posts: 2,
+      follows: 4
+    });
+
+  } catch (error) {
+    console.error('Seed error:', error);
+    return NextResponse.json({ 
+      error: 'Seed failed',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
