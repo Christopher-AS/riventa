@@ -49,3 +49,4 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - Suba o Postgres local com `npm run db:up` (Docker necessário).
 - Gere o cliente com `npm run prisma:generate` e crie o schema inicial com `npm run db:migrate`.
 - Visualize os dados com `npm run db:studio`.
+
