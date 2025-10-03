@@ -9,17 +9,15 @@ async function getPosts() {
       author: {
         select: {
           id: true,
-          name: true,
           email: true,
         },
       },
       likes: true,
       comments: {
         include: {
-          author: {
+          user: {
             select: {
               id: true,
-              name: true,
               email: true,
             },
           },
@@ -56,9 +54,9 @@ export default async function Home() {
         
         {posts.length === 0 && (
           <div className="text-center py-12 bg-white rounded-lg shadow">
-            <p className="text-gray-500">Nenhuma publicação ainda.</p>
+            <p className="text-gray-500">Nenhuma publicacao ainda.</p>
             <p className="text-sm text-gray-400 mt-2">
-              Seja o primeiro a criar uma publicação!
+              Seja o primeiro a criar uma publicacao!
             </p>
           </div>
         )}
