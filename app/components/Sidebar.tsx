@@ -19,28 +19,28 @@ export default function Sidebar() {
             onClick={() => setIsModalOpen(true)}
             className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
           >
-            ✏️ Criar Publicação
+            Criar Publicação
           </button>
 
           
             href="/"
             className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            🏠 Feed
+            Feed
           </a>
 
           
             href="#"
             className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            👤 Perfil
+            Perfil
           </a>
 
           
             href="#"
             className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            📰 Notícias
+            Notícias
           </a>
         </nav>
       </aside>
