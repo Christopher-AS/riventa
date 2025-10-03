@@ -13,7 +13,7 @@ export default function CommentInput({ postId, onCommentAdded }: CommentInputPro
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!content.trim() || isSubmitting) return;
 
     setIsSubmitting(true);
@@ -24,7 +24,7 @@ export default function CommentInput({ postId, onCommentAdded }: CommentInputPro
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: content.trim(),
-          userId: "user-1", // Temporário - será substituído por autenticação real
+          userId: "user-1",
         }),
       });
 
@@ -32,10 +32,10 @@ export default function CommentInput({ postId, onCommentAdded }: CommentInputPro
         setContent("");
         onCommentAdded();
       } else {
-        console.error("Erro ao criar comentário");
+        console.error("Erro ao criar comentario");
       }
     } catch (error) {
-      console.error("Erro ao enviar comentário:", error);
+      console.error("Erro ao enviar comentario:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -51,7 +51,7 @@ export default function CommentInput({ postId, onCommentAdded }: CommentInputPro
           type="text"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Escreva um comentário..."
+          placeholder="Escreva um comentario..."
           className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           disabled={isSubmitting}
         />
