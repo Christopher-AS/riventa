@@ -19,7 +19,7 @@ export default function Sidebar() {
             onClick={() => setIsModalOpen(true)}
             className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
           >
-            Criar Publicação
+            Criar Publicacao
           </button>
 
           
@@ -40,7 +40,7 @@ export default function Sidebar() {
             href="#"
             className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            Notícias
+            Noticias
           </a>
         </nav>
       </aside>
