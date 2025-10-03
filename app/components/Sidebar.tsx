@@ -3,28 +3,52 @@
 import { useState } from "react";
 import CreatePostModal from "./CreatePostModal";
 
-interface SidebarProps {
-  userId: string;
-}
-
-export default function Sidebar({ userId }: SidebarProps) {
+export default function Sidebar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <>
-      <aside className="w-64 border-r border-gray-200 bg-white p-4 min-h-screen">
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="w-full rounded-lg bg-blue-600 px-4 py-3 text-white font-semibold hover:bg-blue-700 transition-colors"
-        >
-          Criar Publicação
-        </button>
+      <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 p-6">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-blue-600">Riventa</h1>
+          <p className="text-sm text-gray-500 mt-1">Social + News</p>
+        </div>
+
+        <nav className="space-y-2">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+          >
+            ✏️ Criar Publicação
+          </button>
+
+          
+            href="/"
+            className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            🏠 Feed
+          </a>
+
+          
+            href="#"
+            className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            👤 Perfil
+          </a>
+
+          
+            href="#"
+            className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            📰 Notícias
+          </a>
+        </nav>
       </aside>
 
       <CreatePostModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        userId={userId}
+        userId="user-1"
       />
     </>
   );
