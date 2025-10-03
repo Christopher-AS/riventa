@@ -4,12 +4,14 @@ import { prisma } from "@/lib/prisma";
 // GET - Buscar comentários de um post
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+    
     const comments = await prisma.comment.findMany({
       where: {
-        postId: params.id,
+        postId: id,
       },
       include: {
         author: {
@@ -38,9 +40,10 @@ export async function GET(
 // POST - Criar comentário
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { content, userId } = await request.json();
 
     if (!content || !userId) {
@@ -53,7 +56,7 @@ export async function POST(
     const comment = await prisma.comment.create({
       data: {
         content,
-        postId: params.id,
+        postId: id,
         authorId: userId,
       },
       include: {
