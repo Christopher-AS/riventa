@@ -11,7 +11,6 @@ type Post = {
   createdAt: Date;
   author: {
     id: string;
-    name: string | null;
     email: string;
   };
   likes: { userId: string }[];
@@ -19,9 +18,8 @@ type Post = {
     id: string;
     content: string;
     createdAt: Date;
-    author: {
+    user: {
       id: string;
-      name: string | null;
       email: string;
     };
   }[];
@@ -57,7 +55,6 @@ export default function PostCard({ post }: { post: Post }) {
   };
 
   const handleCommentAdded = async () => {
-    // Recarregar comentários
     try {
       const response = await fetch(`/api/posts/${post.id}/comments`);
       if (response.ok) {
@@ -66,20 +63,19 @@ export default function PostCard({ post }: { post: Post }) {
         setCommentsCount(data.comments.length);
       }
     } catch (error) {
-      console.error("Erro ao recarregar comentários:", error);
+      console.error("Erro ao recarregar comentarios:", error);
     }
   };
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      {/* Header */}
       <div className="flex items-start gap-3 mb-4">
         <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-          {post.author.name?.[0]?.toUpperCase() || post.author.email[0].toUpperCase()}
+          {post.author.email[0].toUpperCase()}
         </div>
         <div>
           <h3 className="font-semibold text-gray-900">
-            {post.author.name || post.author.email}
+            {post.author.email}
           </h3>
           <p className="text-sm text-gray-500">
             {formatDistanceToNow(new Date(post.createdAt), {
@@ -90,16 +86,13 @@ export default function PostCard({ post }: { post: Post }) {
         </div>
       </div>
 
-      {/* Content */}
       <p className="text-gray-800 mb-4 whitespace-pre-wrap">{post.content}</p>
 
-      {/* Stats */}
       <div className="flex items-center gap-4 text-sm text-gray-500 mb-3 pt-3 border-t">
         <span>{likes} curtidas</span>
-        <span>{commentsCount} comentários</span>
+        <span>{commentsCount} comentarios</span>
       </div>
 
-      {/* Actions */}
       <div className="flex gap-2 pt-3 border-t">
         <button
           onClick={handleLike}
@@ -109,17 +102,16 @@ export default function PostCard({ post }: { post: Post }) {
               : "hover:bg-gray-100 text-gray-700"
           }`}
         >
-          👍 Curtir
+          Curtir
         </button>
         <button
           onClick={() => setShowComments(!showComments)}
           className="flex-1 py-2 px-4 rounded-lg font-medium hover:bg-gray-100 text-gray-700 transition-colors"
         >
-          💬 Comentar
+          Comentar
         </button>
       </div>
 
-      {/* Comments Section */}
       {showComments && (
         <div className="mt-4 pt-4 border-t">
           {comments.length > 0 ? (
@@ -127,12 +119,12 @@ export default function PostCard({ post }: { post: Post }) {
               {comments.map((comment) => (
                 <div key={comment.id} className="flex gap-3">
                   <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
-                    {comment.author.name?.[0]?.toUpperCase() || comment.author.email[0].toUpperCase()}
+                    {comment.user.email[0].toUpperCase()}
                   </div>
                   <div className="flex-1">
                     <div className="bg-gray-100 rounded-lg p-3">
                       <p className="font-semibold text-sm text-gray-900">
-                        {comment.author.name || comment.author.email}
+                        {comment.user.email}
                       </p>
                       <p className="text-gray-800 text-sm mt-1">{comment.content}</p>
                     </div>
@@ -148,11 +140,10 @@ export default function PostCard({ post }: { post: Post }) {
             </div>
           ) : (
             <p className="text-sm text-gray-500 text-center py-4 mb-4">
-              Nenhum comentário ainda. Seja o primeiro!
+              Nenhum comentario ainda. Seja o primeiro!
             </p>
           )}
           
-          {/* Comment Input */}
           <CommentInput postId={post.id} onCommentAdded={handleCommentAdded} />
         </div>
       )}
