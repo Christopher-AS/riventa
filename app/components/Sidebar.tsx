@@ -21,27 +21,6 @@ export default function Sidebar() {
           >
             Criar Post
           </button>
-
-          
-            href="/"
-            className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            Feed
-          </a>
-
-          
-            href="#"
-            className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            Perfil
-          </a>
-
-          
-            href="#"
-            className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            News
-          </a>
         </nav>
       </aside>
 
