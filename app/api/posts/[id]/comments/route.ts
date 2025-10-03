@@ -14,7 +14,7 @@ export async function GET(
         postId: id,
       },
       include: {
-        author: {
+        user: {
           select: {
             id: true,
             name: true,
@@ -57,10 +57,10 @@ export async function POST(
       data: {
         content,
         postId: id,
-        authorId: userId,
+        userId: userId,
       },
       include: {
-        author: {
+        user: {
           select: {
             id: true,
             name: true,
