@@ -6,11 +6,11 @@ import { prisma } from '@/lib/prisma';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { content, userId, imageUrl } = body;
+    const { content, authorId, imageUrl } = body;
 
-    if (!content?.trim() || !userId) {
+    if (!content?.trim() || !authorId) {
       return NextResponse.json(
-        { error: 'content e userId são obrigatórios' },
+        { error: 'content e authorId são obrigatórios' },
         { status: 400 }
       );
     }
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     const post = await prisma.post.create({
       data: {
         content: content.trim(),
-        userId,
+        authorId,
         imageUrl: imageUrl || null,
       },
       include: {
