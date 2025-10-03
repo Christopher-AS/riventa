@@ -48,9 +48,8 @@ export default function CreatePostModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
-        {/* Header */}
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Criar publicação</h2>
+          <h2 className="text-xl font-semibold">Criar publicacao</h2>
           <button
             onClick={onClose}
             className="rounded-full p-2 hover:bg-gray-100"
@@ -59,15 +58,13 @@ export default function CreatePostModal({
           </button>
         </div>
 
-        {/* Textarea */}
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Sobre o que você quer falar?"
+          placeholder="Sobre o que voce quer falar?"
           className="w-full min-h-[200px] resize-none border-0 p-0 text-lg focus:outline-none focus:ring-0"
         />
 
-        {/* Toolbar */}
         <div className="mt-4 flex items-center gap-2 border-t pt-4">
           <button
             className="rounded-full p-2 hover:bg-gray-100"
