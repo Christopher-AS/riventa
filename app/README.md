@@ -42,3 +42,11 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 - Copie `.env.example` para `.env.local`.
 - Configure `OPENAI_API_KEY` com sua chave da OpenAI. `COMMIT_SHA` é definido no `docker run` quando necessário.
+
+## Banco de Dados & Prisma
+- Execute `npm install prisma @prisma/client` para preparar o cliente ORM.
+- Copie `.env.example` para `.env.local` e ajuste as variáveis se necessário.
+- Suba o Postgres local com `npm run db:up` (Docker necessário).
+- Gere o cliente com `npm run prisma:generate` e crie o schema inicial com `npm run db:migrate`.
+- Visualize os dados com `npm run db:studio`.
+
