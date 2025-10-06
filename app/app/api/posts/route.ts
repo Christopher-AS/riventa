@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+// Configuração de runtime
+
+export const runtime = 'nodejs';
+export const maxDuration = 10;
 // POST /api/posts
 // Cria um novo post
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();

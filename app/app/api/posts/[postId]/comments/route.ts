@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+// Configuração de runtime
+export const runtime = 'nodejs';
+export const maxDuration = 10;
+
 // GET - Buscar comentários de um post
 export async function GET(
   request: NextRequest,
