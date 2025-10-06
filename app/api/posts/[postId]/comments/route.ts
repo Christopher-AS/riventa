@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+// Configuração de runtime
+export const runtime = 'nodejs';
+export const maxDuration = 10;
+
 // GET - Buscar comentários de um post
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    const { id } = await params;
-    
+    const { postId } = await params;
+
     const comments = await prisma.comment.findMany({
       where: {
-        postId: id,
+        postId: postId,
       },
       include: {
         user: {
@@ -39,10 +43,10 @@ export async function GET(
 // POST - Criar comentário
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { postId } = await params;
     const { content, userId } = await request.json();
 
     if (!content || !userId) {
@@ -55,7 +59,7 @@ export async function POST(
     const comment = await prisma.comment.create({
       data: {
         content,
-        postId: id,
+        postId: postId,
         userId: userId,
       },
       include: {
