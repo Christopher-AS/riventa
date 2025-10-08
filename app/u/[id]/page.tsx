@@ -1,6 +1,6 @@
 import Link from "next/link";
 import FollowButton from "../../components/FollowButton";
-import { prisma } from "@/lib/prisma"; // se o alias falhar, use "../../../lib/prisma"
+import prisma from "@/lib/prisma"; // se o alias falhar, use "../../../lib/prisma"
 
 export const dynamic = "force-dynamic";
 

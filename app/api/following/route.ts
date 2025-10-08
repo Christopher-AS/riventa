@@ -1,6 +1,6 @@
 // app/api/following/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma"; // se houver erro de alias, ajuste para caminho relativo: "../../lib/prisma"
+import prisma from "@/lib/prisma"; // se houver erro de alias, ajuste para caminho relativo: "../../lib/prisma"
 import { z } from "zod";
 
 const querySchema = z.object({
