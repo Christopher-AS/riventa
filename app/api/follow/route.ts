@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../lib/prisma"; // caminho relativo: app/api/follow -> app/lib/prisma
+import prisma from "@/lib/prisma"; // caminho relativo: app/api/follow -> app/lib/prisma
 
 function bad(msg: string, status = 400) {
   return NextResponse.json({ ok: false, error: msg }, { status });

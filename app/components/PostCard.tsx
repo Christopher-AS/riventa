@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import CommentInput from "./CommentInput";
+import FollowButton from "./FollowButton";
 
 type Post = {
   id: string;
@@ -79,16 +80,23 @@ export default function PostCard({ post }: { post: Post }) {
         <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
           {post.author.email[0].toUpperCase()}
         </div>
-        <div>
-          <h3 className="font-semibold text-gray-900">
-            {post.author.email}
-          </h3>
-          <p className="text-sm text-gray-500">
-            {formatDistanceToNow(new Date(post.createdAt), {
-              addSuffix: true,
-              locale: ptBR,
-            })}
-          </p>
+        <div className="flex-1">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-gray-900">
+                {post.author.email}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {formatDistanceToNow(new Date(post.createdAt), {
+                  addSuffix: true,
+                  locale: ptBR,
+                })}
+              </p>
+            </div>
+            {userId && post.author.id !== userId && (
+              <FollowButton targetUserId={post.author.id} viewerId={userId} />
+            )}
+          </div>
         </div>
       </div>
 
