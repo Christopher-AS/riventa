@@ -24,7 +24,7 @@ export default function CommentInput({ postId, onCommentAdded }: CommentInputPro
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: content.trim(),
-          userId: "user-1",
+          userId: "bf96eb9a-3e36-42c5-ae75-6dd8b34f7844",
         }),
       });
 

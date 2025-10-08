@@ -41,7 +41,7 @@ export default function PostCard({ post }: { post: Post }) {
       const response = await fetch(`/api/posts/${post.id}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: "user-1" }),
+        body: JSON.stringify({ userId: "bf96eb9a-3e36-42c5-ae75-6dd8b34f7844" }),
       });
 
       if (response.ok) {
