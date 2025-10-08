@@ -88,11 +88,6 @@ export default function PostCard({ post }: { post: Post }) {
 
       <p className="text-gray-800 mb-4 whitespace-pre-wrap">{post.content}</p>
 
-      <div className="flex items-center gap-4 text-sm text-gray-500 mb-3 pt-3 border-t">
-        <span>{likes} curtidas</span>
-        <span>{commentsCount} comentarios</span>
-      </div>
-
       <div className="flex gap-2 pt-3 border-t">
         <button
           onClick={handleLike}
@@ -102,13 +97,13 @@ export default function PostCard({ post }: { post: Post }) {
               : "hover:bg-gray-100 text-gray-700"
           }`}
         >
-          Curtir
+          Curtir ({likes})
         </button>
         <button
           onClick={() => setShowComments(!showComments)}
           className="flex-1 py-2 px-4 rounded-lg font-medium hover:bg-gray-100 text-gray-700 transition-colors"
         >
-          Comentar
+          Comentar ({commentsCount})
         </button>
       </div>
 
@@ -143,7 +138,7 @@ export default function PostCard({ post }: { post: Post }) {
               Nenhum comentario ainda. Seja o primeiro!
             </p>
           )}
-          
+
           <CommentInput postId={post.id} onCommentAdded={handleCommentAdded} />
         </div>
       )}
