@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import CommentInput from "./CommentInput";
@@ -30,18 +31,23 @@ type Post = {
 };
 
 export default function PostCard({ post }: { post: Post }) {
+  const { data: session } = useSession();
   const [likes, setLikes] = useState(post._count.likes);
   const [isLiked, setIsLiked] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState(post.comments);
   const [commentsCount, setCommentsCount] = useState(post._count.comments);
 
+  const userId = session?.user?.id || "";
+
   const handleLike = async () => {
+    if (!userId) return;
+
     try {
       const response = await fetch(`/api/posts/${post.id}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: "bf96eb9a-3e36-42c5-ae75-6dd8b34f7844" }),
+        body: JSON.stringify({ userId }),
       });
 
       if (response.ok) {
@@ -139,7 +145,7 @@ export default function PostCard({ post }: { post: Post }) {
             </p>
           )}
 
-          <CommentInput postId={post.id} onCommentAdded={handleCommentAdded} />
+          <CommentInput postId={post.id} userId={userId} onCommentAdded={handleCommentAdded} />
         </div>
       )}
     </div>

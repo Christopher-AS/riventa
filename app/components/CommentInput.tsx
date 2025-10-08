@@ -4,17 +4,18 @@ import { useState } from "react";
 
 type CommentInputProps = {
   postId: string;
+  userId: string;
   onCommentAdded: () => void;
 };
 
-export default function CommentInput({ postId, onCommentAdded }: CommentInputProps) {
+export default function CommentInput({ postId, userId, onCommentAdded }: CommentInputProps) {
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!content.trim() || isSubmitting) return;
+    if (!content.trim() || isSubmitting || !userId) return;
 
     setIsSubmitting(true);
 
@@ -24,7 +25,7 @@ export default function CommentInput({ postId, onCommentAdded }: CommentInputPro
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: content.trim(),
-          userId: "bf96eb9a-3e36-42c5-ae75-6dd8b34f7844",
+          userId,
         }),
       });
 

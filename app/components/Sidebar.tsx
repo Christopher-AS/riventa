@@ -1,10 +1,34 @@
 "use client";
 
 import { useState } from "react";
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import CreatePostModal from "./CreatePostModal";
 
 export default function Sidebar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  // Se não estiver logado, redireciona para login
+  if (status === "unauthenticated") {
+    router.push("/login");
+    return null;
+  }
+
+  // Enquanto carrega a sessão
+  if (status === "loading") {
+    return (
+      <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 p-6">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-blue-600">Riventa</h1>
+          <p className="text-sm text-gray-500 mt-1">Carregando...</p>
+        </div>
+      </aside>
+    );
+  }
+
+  const userId = session?.user?.id || "";
 
   return (
     <>
@@ -20,12 +44,25 @@ export default function Sidebar() {
         >
           Criar Post
         </button>
+
+        {/* Informações do usuário */}
+        <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+          <p className="text-sm font-medium text-gray-900">
+            {session?.user?.email}
+          </p>
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="mt-2 text-sm text-red-600 hover:text-red-700"
+          >
+            Sair
+          </button>
+        </div>
       </aside>
 
       <CreatePostModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        userId="bf96eb9a-3e36-42c5-ae75-6dd8b34f7844"
+        userId={userId}
       />
     </>
   );
