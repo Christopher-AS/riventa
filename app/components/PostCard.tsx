@@ -97,13 +97,13 @@ export default function PostCard({ post }: { post: Post }) {
               : "hover:bg-gray-100 text-gray-700"
           }`}
         >
-          Curtir ({likes})
+          Curtir {likes}
         </button>
         <button
           onClick={() => setShowComments(!showComments)}
           className="flex-1 py-2 px-4 rounded-lg font-medium hover:bg-gray-100 text-gray-700 transition-colors"
         >
-          Comentar ({commentsCount})
+          Comentar {commentsCount}
         </button>
       </div>
 
