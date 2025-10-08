@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "../../lib/prisma"; // se quebrar, troque para "@/lib/prisma"
+import prisma from "@/lib/prisma"; // se quebrar, troque para "@/lib/prisma"
 
 function bad(msg: string, status = 400) {
   return NextResponse.json({ ok: false, error: msg }, { status });
