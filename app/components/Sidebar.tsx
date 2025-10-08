@@ -25,7 +25,7 @@ export default function Sidebar() {
       <CreatePostModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        userId="user-1"
+        userId="bf96eb9a-3e36-42c5-ae75-6dd8b34f7844"
       />
     </>
   );
