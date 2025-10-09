@@ -24,6 +24,7 @@ async function main() {
       password: hashedPassword,
       profile: {
         create: {
+          name: 'Alice Demo',
           bio: 'Usuária de teste do Riventa',
           avatar: 'https://i.pravatar.cc/150?img=1',
         },
@@ -37,6 +38,7 @@ async function main() {
       password: hashedPassword,
       profile: {
         create: {
+          name: 'Bob Silva',
           bio: 'Desenvolvedor e entusiasta de tecnologia',
           avatar: 'https://i.pravatar.cc/150?img=2',
         },
@@ -50,6 +52,7 @@ async function main() {
       password: hashedPassword,
       profile: {
         create: {
+          name: 'Carol Santos',
           bio: 'Designer apaixonada por UX',
           avatar: 'https://i.pravatar.cc/150?img=3',
         },
@@ -58,9 +61,9 @@ async function main() {
   });
 
   console.log('✅ Usuários criados:');
-  console.log('   - alice@demo.com');
-  console.log('   - bob@demo.com');
-  console.log('   - carol@demo.com');
+  console.log('   - Alice Demo (alice@demo.com)');
+  console.log('   - Bob Silva (bob@demo.com)');
+  console.log('   - Carol Santos (carol@demo.com)');
   console.log('   Senha: password123');
 }
 
