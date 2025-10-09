@@ -5,11 +5,12 @@ import prisma from '@/lib/prisma';
 // POST - Seguir usuário
 export async function POST(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
+    const { userId } = await params;
     const session = await getServerSession();
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
     }
@@ -23,7 +24,7 @@ export async function POST(
       return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 });
     }
 
-    const userIdToFollow = params.userId;
+    const userIdToFollow = userId;
 
     // Não pode seguir a si mesmo
     if (currentUser.id === userIdToFollow) {
@@ -62,11 +63,12 @@ export async function POST(
 // DELETE - Deixar de seguir
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
+    const { userId } = await params;
     const session = await getServerSession();
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
     }
@@ -80,7 +82,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 });
     }
 
-    const userIdToUnfollow = params.userId;
+    const userIdToUnfollow = userId;
 
     // Deletar follow
     await prisma.follow.delete({
