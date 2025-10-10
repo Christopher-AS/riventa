@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
+import FollowButton from "@/components/FollowButton";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 type PageProps = {
   params: Promise<{ userId: string }>;
@@ -7,6 +10,10 @@ type PageProps = {
 
 export default async function UserProfilePage({ params }: PageProps) {
   const { userId } = await params;
+
+  // Obter sessão do usuário logado
+  const session = await getServerSession(authOptions);
+  const viewerId = session?.user?.id;
 
   // Carregar usuário com profile
   const user = await prisma.user.findUnique({
@@ -71,8 +78,16 @@ export default async function UserProfilePage({ params }: PageProps) {
 
         {/* Informações do usuário */}
         <div className="flex-1">
-          <h1 className="text-3xl font-bold mb-2">{displayName}</h1>
-          <p className="text-gray-600 mb-4">{user.email}</p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">{displayName}</h1>
+              <p className="text-gray-600">{user.email}</p>
+            </div>
+            {/* Botão de seguir */}
+            {viewerId && viewerId !== userId && (
+              <FollowButton targetUserId={userId} viewerId={viewerId} />
+            )}
+          </div>
 
           {/* Contadores */}
           <div className="flex gap-6 mb-4">
