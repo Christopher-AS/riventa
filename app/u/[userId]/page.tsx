@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import FollowButton from "@/components/FollowButton";
-import { authOptions } from "@/api/auth/[...nextauth]/route";
 
 type PageProps = {
   params: Promise<{ userId: string }>;
@@ -12,7 +11,7 @@ export default async function UserProfilePage({ params }: PageProps) {
   const { userId } = await params;
 
   // Obter sessão do usuário logado
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession();
   const viewerId = session?.user?.id;
 
   // Carregar usuário com profile
