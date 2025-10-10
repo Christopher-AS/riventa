@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import prisma from "@/lib/prisma";
 import FollowButton from "@/components/FollowButton";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/api/auth/[...nextauth]/route";
 
 type PageProps = {
   params: Promise<{ userId: string }>;
