@@ -13,6 +13,8 @@ export default async function UserProfilePage({ params }: PageProps) {
   // Obter sessão do usuário logado
   const session = await getServerSession();
   const viewerId = session?.user?.id;
+  
+  console.log("viewerId:", viewerId, "userId:", userId);
 
   // Carregar usuário com profile
   const user = await prisma.user.findUnique({
