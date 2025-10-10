@@ -107,10 +107,10 @@ export default function FollowButton({ targetUserId, viewerId }: Props) {
         aria-pressed={isFollowing}
         disabled={loading}
         className={[
-          "inline-flex items-center gap-2 rounded-2xl px-3 py-1 text-sm font-medium",
+          "inline-flex items-center gap-2 rounded-lg px-6 py-2 text-sm font-semibold transition-colors",
           isFollowing
-            ? "bg-blue-100 text-blue-700"
-            : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+            ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            : "bg-blue-600 text-white hover:bg-blue-700",
           loading ? "opacity-60 cursor-not-allowed" : "cursor-pointer",
         ].join(" ")}
       >
