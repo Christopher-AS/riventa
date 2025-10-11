@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import FollowButton from "@/components/FollowButton";
 
@@ -11,7 +12,7 @@ export default async function UserProfilePage({ params }: PageProps) {
   const { userId } = await params;
 
   // Obter sessão do usuário logado
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
   const viewerId = session?.user?.id;
   
   console.log("DEBUG PROFILE:", { hasSession: !!session, email: session?.user?.email, userId: session?.user?.id, viewerId, targetUserId: userId });
