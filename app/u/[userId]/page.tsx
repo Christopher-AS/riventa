@@ -14,6 +14,7 @@ export default async function UserProfilePage({ params }: PageProps) {
   const session = await getServerSession();
   const viewerId = session?.user?.id;
   
+  console.log("DEBUG PROFILE:", { hasSession: !!session, email: session?.user?.email, userId: session?.user?.id, viewerId, targetUserId: userId });
   console.log("viewerId:", viewerId, "userId:", userId);
 
   // Carregar usuário com profile
