@@ -21,17 +21,18 @@ export default async function Home() {
   }> = [];
 
   if (userId) {
-    // IDs que o usuário segue + o próprio usuário
+    // IDs que o usuário segue
     const follows = await prisma.follow.findMany({
       where: { followerId: userId },
       select: { followingId: true },
     });
     const followingIds = follows.map((f) => f.followingId);
-    const authorIds = Array.from(new Set([...followingIds, userId]));
 
-    posts = await prisma.post.findMany({
-      where: { authorId: { in: authorIds } },
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    // Query 1: Posts de quem o usuário segue (incluindo próprio usuário)
+    const followingPosts = await prisma.post.findMany({
+      where: { authorId: { in: [...followingIds, userId] } },
+      orderBy: { createdAt: "desc" },
+      take: 15,
       include: {
         author: {
           select: {
@@ -43,11 +44,39 @@ export default async function Home() {
         _count: { select: { likes: true, comments: true } },
       },
     });
+
+    // Query 2: Posts de descoberta (usuários que NÃO segue)
+    // Ordenados por engajamento (likes + comments)
+    const allDiscoveryPosts = await prisma.post.findMany({
+      where: {
+        authorId: { notIn: [...followingIds, userId] },
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            email: true,
+            profile: { select: { name: true, avatar: true } },
+          },
+        },
+        _count: { select: { likes: true, comments: true } },
+      },
+    });
+
+    // Ordenar por engajamento (likes + comments) e pegar top 20
+    const discoveryPosts = allDiscoveryPosts
+      .sort((a, b) => {
+        const engagementA = a._count.likes + a._count.comments;
+        const engagementB = b._count.likes + b._count.comments;
+        return engagementB - engagementA;
+      })
+      .slice(0, 20);
+
+    // Combinar os dois feeds
+    posts = [...followingPosts, ...discoveryPosts];
   } else {
-    // Sem login: mostra posts recentes (modo "explore" básico)
-    posts = await prisma.post.findMany({
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-      take: 20,
+    // Sem login: mostrar apenas discovery posts ordenados por engajamento
+    const allPosts = await prisma.post.findMany({
       include: {
         author: {
           select: {
@@ -59,13 +88,22 @@ export default async function Home() {
         _count: { select: { likes: true, comments: true } },
       },
     });
+
+    // Ordenar por engajamento e pegar top 20
+    posts = allPosts
+      .sort((a, b) => {
+        const engagementA = a._count.likes + a._count.comments;
+        const engagementB = b._count.likes + b._count.comments;
+        return engagementB - engagementA;
+      })
+      .slice(0, 20);
   }
 
   return (
     <main className="mx-auto max-w-2xl p-4 space-y-4">
       {!userId && (
         <div className="rounded-lg border p-3 text-sm">
-          Faça login para ver seu feed personalizado. Exibindo posts recentes.
+          Faça login para ver seu feed personalizado. Exibindo posts populares.
         </div>
       )}
 
