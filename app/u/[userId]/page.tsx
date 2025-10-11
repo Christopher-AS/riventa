@@ -61,6 +61,11 @@ export default async function UserProfilePage({ params }: PageProps) {
 
   return (
     <main className="max-w-5xl mx-auto px-4 py-8">
+      {/* Debug visual temporário */}
+      <div className="bg-yellow-200 p-4 mb-4 text-black">
+        <strong>DEBUG:</strong> Session={session?.user?.email || 'null'}, ViewerId={viewerId || 'null'}, TargetId={userId}, ShowButton={String(viewerId && viewerId !== userId)}
+      </div>
+
       {/* Cabeçalho do perfil */}
       <div className="flex items-start gap-8 mb-12">
         {/* Avatar grande */}
