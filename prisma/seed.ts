@@ -55,6 +55,14 @@ const commentTexts = [
   'Ótimo conteúdo',
 ];
 
+const unsplashCategories = [
+  'nature',
+  'technology',
+  'food',
+  'travel',
+  'people',
+];
+
 function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -144,11 +152,14 @@ async function main() {
     for (let postNum = 0; postNum < 100; postNum++) {
       const content = randomElement(postContents) + ` #${postNum + 1}`;
       const createdAt = new Date(Date.now() - randomInt(0, 90) * 24 * 60 * 60 * 1000); // últimos 90 dias
+      const category = randomElement(unsplashCategories);
+      const imageUrl = `https://source.unsplash.com/800x800/?${category}`;
 
       posts.push({
         content,
         authorId: userId,
         createdAt,
+        imageUrl,
       });
     }
 
