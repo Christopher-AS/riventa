@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import FollowButton from "@/components/FollowButton";
+import Link from "next/link";
 
 type PageProps = {
   params: Promise<{ userId: string }>;
@@ -121,9 +122,10 @@ export default async function UserProfilePage({ params }: PageProps) {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {posts.map((post) => (
-            <div
+            <Link
               key={post.id}
-              className="aspect-square bg-gray-100 rounded-lg overflow-hidden hover:opacity-80 transition-opacity cursor-pointer group relative"
+              href={`/posts/${post.id}`}
+              className="aspect-square bg-gray-200 rounded-lg overflow-hidden hover:opacity-75 transition-opacity cursor-pointer group relative block"
             >
               {post.imageUrl ? (
                 <img
@@ -132,15 +134,15 @@ export default async function UserProfilePage({ params }: PageProps) {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full p-4 flex items-center justify-center text-center">
-                  <p className="text-sm text-gray-700 line-clamp-6">
+                <div className="w-full h-full bg-gray-300 flex items-center justify-center p-4">
+                  <p className="text-sm text-gray-600 line-clamp-6 text-center">
                     {post.content}
                   </p>
                 </div>
               )}
               {/* Overlay com hover */}
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all"></div>
-            </div>
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200"></div>
+            </Link>
           ))}
         </div>
       )}
