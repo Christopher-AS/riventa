@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import FollowButton from "@/components/FollowButton";
+import ProfileStats from "@/components/ProfileStats";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -91,24 +92,17 @@ export default async function UserProfilePage({ params }: PageProps) {
             )}
           </div>
 
-          {/* Contadores */}
-          <div className="flex gap-6 mb-4">
-            <div>
-              <span className="font-bold text-lg">{posts.length}</span>
-              <span className="text-gray-600 ml-1">posts</span>
-            </div>
-            <div>
-              <span className="font-bold text-lg">{followersCount}</span>
-              <span className="text-gray-600 ml-1">seguidores</span>
-            </div>
-            <div>
-              <span className="font-bold text-lg">{followingCount}</span>
-              <span className="text-gray-600 ml-1">seguindo</span>
-            </div>
-          </div>
+          {/* Contadores usando ProfileStats */}
+          <ProfileStats
+            userId={userId}
+            viewerId={viewerId || ""}
+            followersCount={followersCount}
+            followingCount={followingCount}
+            postsCount={posts.length}
+          />
 
           {/* Bio */}
-          {bio && <p className="text-gray-800 whitespace-pre-wrap">{bio}</p>}
+          {bio && <p className="text-gray-800 whitespace-pre-wrap mt-4">{bio}</p>}
         </div>
       </div>
 
