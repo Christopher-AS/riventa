@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import FollowButton from "@/components/FollowButton";
 import Link from "next/link";
+import Image from "next/image";
 
 type PageProps = {
   params: Promise<{ userId: string }>;
@@ -128,11 +129,14 @@ export default async function UserProfilePage({ params }: PageProps) {
               className="aspect-square bg-gray-200 rounded-lg overflow-hidden hover:opacity-75 transition-opacity cursor-pointer group relative block"
             >
               {post.imageUrl ? (
-                <img
-                  src={post.imageUrl}
-                  alt="Post"
-                  className="w-full h-full object-cover"
-                />
+                <div className="relative w-full h-full">
+                  <Image
+                    src={post.imageUrl}
+                    alt="Post"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
               ) : (
                 <div className="w-full h-full bg-gray-300 flex items-center justify-center p-4">
                   <p className="text-sm text-gray-600 line-clamp-6 text-center">

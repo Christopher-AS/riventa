@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import prisma from "@/lib/prisma";
 import LikeButton from "@/components/LikeButton";
 import { getServerSession } from "next-auth";
@@ -195,11 +196,14 @@ export default async function PostPage({ params }: PageProps) {
 
           {/* Image */}
           {post.imageUrl && (
-            <div className="w-full bg-black flex items-center justify-center">
-              <img
+            <div className="w-full bg-black flex items-center justify-center relative" style={{ minHeight: '400px', maxHeight: '600px' }}>
+              <Image
                 src={post.imageUrl}
                 alt="Post"
+                width={800}
+                height={800}
                 className="max-w-full max-h-[600px] object-contain"
+                style={{ width: 'auto', height: 'auto' }}
               />
             </div>
           )}
