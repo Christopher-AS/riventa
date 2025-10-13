@@ -23,6 +23,23 @@ const nextConfig = {
     
     return config;
   },
+  // Configuração de imagens remotas
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'source.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.pravatar.cc',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
   // Desabilitar ESLint no build para deploy rápido
   eslint: {
     ignoreDuringBuilds: true,
