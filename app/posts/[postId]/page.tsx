@@ -25,7 +25,7 @@ async function getPost(postId: string) {
       },
       comments: {
         include: {
-          author: {
+          user: {
             include: {
               profile: true,
             },
@@ -260,12 +260,12 @@ export default async function PostPage({ params }: PageProps) {
               <div className="space-y-4">
                 {post.comments.map((comment) => {
                   const commentAuthorName =
-                    comment.author.profile?.name || comment.author.email;
-                  const commentAuthorAvatar = comment.author.profile?.avatar;
+                    comment.user.profile?.name || comment.user.email;
+                  const commentAuthorAvatar = comment.user.profile?.avatar;
 
                   return (
                     <div key={comment.id} className="flex gap-3">
-                      <Link href={`/u/${comment.author.id}`}>
+                      <Link href={`/u/${comment.user.id}`}>
                         {commentAuthorAvatar ? (
                           <img
                             src={commentAuthorAvatar}
@@ -281,7 +281,7 @@ export default async function PostPage({ params }: PageProps) {
                       <div className="flex-1">
                         <div className="bg-gray-100 rounded-lg px-3 py-2">
                           <Link
-                            href={`/u/${comment.author.id}`}
+                            href={`/u/${comment.user.id}`}
                             className="font-semibold text-sm hover:underline"
                           >
                             {commentAuthorName}
