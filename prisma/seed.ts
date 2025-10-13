@@ -55,14 +55,6 @@ const commentTexts = [
   'Ótimo conteúdo',
 ];
 
-const unsplashCategories = [
-  'nature',
-  'technology',
-  'food',
-  'travel',
-  'people',
-];
-
 function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -143,6 +135,7 @@ async function main() {
   console.log('📝 Criando posts (100 por usuário)...');
 
   let totalPosts = 0;
+  let imageCounter = 1;
 
   for (let userIdx = 0; userIdx < userIds.length; userIdx++) {
     const userId = userIds[userIdx];
@@ -152,8 +145,8 @@ async function main() {
     for (let postNum = 0; postNum < 100; postNum++) {
       const content = randomElement(postContents) + ` #${postNum + 1}`;
       const createdAt = new Date(Date.now() - randomInt(0, 90) * 24 * 60 * 60 * 1000); // últimos 90 dias
-      const category = randomElement(unsplashCategories);
-      const imageUrl = `https://source.unsplash.com/800x800/?${category}`;
+      const imageUrl = `https://picsum.photos/800/800?random=${imageCounter}`;
+      imageCounter++;
 
       posts.push({
         content,
