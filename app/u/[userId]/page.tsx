@@ -135,7 +135,7 @@ export default async function UserProfilePage({ params }: PageProps) {
                 </div>
               )}
               {/* Overlay com hover */}
-              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200"></div>
+              <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-30 transition-all duration-200"></div>
             </Link>
           ))}
         </div>
