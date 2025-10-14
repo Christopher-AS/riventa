@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import CreatePostModal from "./CreatePostModal";
+import SearchDrawer from "./SearchDrawer";
 
 export default function Sidebar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -46,8 +47,8 @@ export default function Sidebar() {
           Criar Post
         </button>
 
-        <Link
-          href="/search"
+        <button
+          onClick={() => setIsSearchOpen(true)}
           className="w-full mt-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
         >
           <svg
@@ -65,7 +66,7 @@ export default function Sidebar() {
             />
           </svg>
           Buscar
-        </Link>
+        </button>
 
         {/* Informações do usuário */}
         <div className="mt-8 p-4 bg-gray-50 rounded-lg">
@@ -85,6 +86,11 @@ export default function Sidebar() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         userId={userId}
+      />
+
+      <SearchDrawer
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
       />
     </>
   );
