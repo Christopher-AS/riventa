@@ -1,17 +1,15 @@
-import SearchBox from "@/components/SearchBox";
+import SearchBar from "@/components/SearchBar";
 
 export const dynamic = "force-dynamic";
 
 export default function SearchPage() {
   return (
-    <main className="space-y-6">
-      <h1 className="text-2xl font-bold">Pesquisa</h1>
-      <p className="text-gray-600">
-        Digite o nome ou e-mail para localizar pessoas ou empresas.
-      </p>
-
-      {/* Caixa de pesquisa interativa */}
-      <SearchBox />
+    <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+      <h1 className="text-2xl font-bold text-center">Buscar Usuários</h1>
+      
+      <div className="flex justify-center">
+        <SearchBar />
+      </div>
     </main>
   );
 }
