@@ -5,13 +5,14 @@ import {
   Newspaper, 
   Home, 
   Star, 
-  Wallet, 
+  Banknote, 
   Cpu, 
   Flag, 
-  Leaf, 
+  Sprout, 
   Globe, 
-  Dribbble, 
-  Clapperboard 
+  Trophy, 
+  Clapperboard,
+  Rocket
 } from 'lucide-react';
 
 interface CategoryItem {
@@ -23,14 +24,14 @@ interface CategoryItem {
 }
 
 const categories: CategoryItem[] = [
-  { id: 'home', label: 'Home', icon: Home, type: 'home' },
+  { id: 'home', label: 'Início', icon: Home, type: 'home' },
   { id: 'general', label: 'Principais', icon: Star, type: 'category', value: 'general' },
-  { id: 'business', label: 'Finanças', icon: Wallet, type: 'category', value: 'business' },
+  { id: 'business', label: 'Finanças', icon: Banknote, type: 'category', value: 'business' },
   { id: 'technology', label: 'Tech', icon: Cpu, type: 'category', value: 'technology' },
   { id: 'br', label: 'Brasil', icon: Flag, type: 'country', value: 'br' },
-  { id: 'agro', label: 'Agro', icon: Leaf, type: 'category', value: 'agro' },
+  { id: 'agro', label: 'Agro', icon: Sprout, type: 'category', value: 'agro' },
   { id: 'us', label: 'Mundo', icon: Globe, type: 'country', value: 'us' },
-  { id: 'sports', label: 'Sports', icon: Dribbble, type: 'category', value: 'sports' },
+  { id: 'sports', label: 'Sports', icon: Trophy, type: 'category', value: 'sports' },
   { id: 'entertainment', label: 'Entretenimento', icon: Clapperboard, type: 'category', value: 'entertainment' },
 ];
 
@@ -79,7 +80,7 @@ export default function NewsSidebar() {
           className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg py-2 w-full flex items-center justify-center gap-2 transition"
           aria-label="Voltar para Riventa Social"
         >
-          <Home className="w-4 h-4" />
+          <Rocket className="w-4 h-4" />
           <span>Riventa Social</span>
         </button>
       </div>
@@ -91,7 +92,7 @@ export default function NewsSidebar() {
           </h2>
         </div>
         
-        <ul className="space-y-2.5">
+        <ul className="space-y-2">
           {categories.map((item) => {
             const active = isActive(item);
             const IconComponent = item.icon;
@@ -101,7 +102,7 @@ export default function NewsSidebar() {
                 <button
                   onClick={() => handleNavigation(item)}
                   className={`
-                    w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors
+                    w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors
                     ${
                       active
                         ? 'bg-blue-50 text-blue-700 font-semibold'
