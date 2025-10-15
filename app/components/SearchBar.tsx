@@ -12,7 +12,11 @@ type SearchResult = {
   } | null;
 };
 
-export default function SearchBar() {
+type SearchBarProps = {
+  onResultClick?: () => void;
+};
+
+export default function SearchBar({ onResultClick }: SearchBarProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -139,7 +143,10 @@ export default function SearchBar() {
                   key={user.id}
                   href={`/u/${user.id}`}
                   className="flex items-center gap-3 p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
-                  onClick={() => setShowDropdown(false)}
+                  onClick={() => {
+                    setShowDropdown(false);
+                    onResultClick?.();
+                  }}
                 >
                   <img
                     src={avatar}
