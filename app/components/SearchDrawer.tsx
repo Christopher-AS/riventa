@@ -51,7 +51,7 @@ export default function SearchDrawer({ isOpen, onClose }: SearchDrawerProps) {
 
         {/* Search Bar */}
         <div className="p-6">
-          <SearchBar />
+          <SearchBar onResultClick={onClose} />
         </div>
       </div>
     </>
