@@ -1,26 +1,37 @@
 'use client';
 
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
+import { 
+  Newspaper, 
+  Home, 
+  Star, 
+  Wallet, 
+  Cpu, 
+  Flag, 
+  Leaf, 
+  Globe, 
+  Dribbble, 
+  Clapperboard 
+} from 'lucide-react';
 
 interface CategoryItem {
   id: string;
   label: string;
-  emoji: string;
+  icon: React.ComponentType<{ className?: string }>;
   type: 'home' | 'category' | 'country';
   value?: string;
 }
 
 const categories: CategoryItem[] = [
-  { id: 'home', label: 'Início', emoji: '🏠', type: 'home' },
-  { id: 'general', label: 'Principais', emoji: '⭐', type: 'category', value: 'general' },
-  { id: 'business', label: 'Finanças', emoji: '💰', type: 'category', value: 'business' },
-  { id: 'technology', label: 'Tech', emoji: '💻', type: 'category', value: 'technology' },
-  { id: 'br', label: 'Brasil', emoji: '🇧🇷', type: 'country', value: 'br' },
-  { id: 'us', label: 'Mundo', emoji: '🌍', type: 'country', value: 'us' },
-  { id: 'sports', label: 'Sports', emoji: '⚽', type: 'category', value: 'sports' },
-  { id: 'entertainment', label: 'Entretenimento', emoji: '🎬', type: 'category', value: 'entertainment' },
-  { id: 'health', label: 'Saúde', emoji: '🏥', type: 'category', value: 'health' },
-  { id: 'science', label: 'Ciência', emoji: '🔬', type: 'category', value: 'science' },
+  { id: 'home', label: 'Home', icon: Home, type: 'home' },
+  { id: 'general', label: 'Principais', icon: Star, type: 'category', value: 'general' },
+  { id: 'business', label: 'Finanças', icon: Wallet, type: 'category', value: 'business' },
+  { id: 'technology', label: 'Tech', icon: Cpu, type: 'category', value: 'technology' },
+  { id: 'br', label: 'Brasil', icon: Flag, type: 'country', value: 'br' },
+  { id: 'agro', label: 'Agro', icon: Leaf, type: 'category', value: 'agro' },
+  { id: 'us', label: 'Mundo', icon: Globe, type: 'country', value: 'us' },
+  { id: 'sports', label: 'Sports', icon: Dribbble, type: 'category', value: 'sports' },
+  { id: 'entertainment', label: 'Entretenimento', icon: Clapperboard, type: 'category', value: 'entertainment' },
 ];
 
 export default function NewsSidebar() {
@@ -56,23 +67,35 @@ export default function NewsSidebar() {
   };
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col">
-      <div className="p-4 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-gray-900 mb-3">NewsExplorer</h1>
+    <aside className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col overflow-y-auto">
+      <div className="p-4 space-y-4">
+        <div className="flex items-center gap-2">
+          <Newspaper className="w-5 h-5 text-gray-700" />
+          <h1 className="text-lg font-bold text-gray-900">NewsExplorer</h1>
+        </div>
+        
         <button
           onClick={handleBackToSocial}
-          className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
-          aria-label="Voltar para o feed social"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg py-2 w-full flex items-center justify-center gap-2 transition"
+          aria-label="Voltar para Riventa Social"
         >
-          <span>←</span>
-          <span>Social</span>
+          <Home className="w-4 h-4" />
+          <span>Riventa Social</span>
         </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto p-3" role="navigation" aria-label="Categorias de notícias">
-        <ul className="space-y-1">
+      <nav className="flex-1 px-3 py-6" role="navigation" aria-label="Categorias de notícias">
+        <div className="mb-3 px-3">
+          <h2 className="text-xs uppercase text-gray-500 font-semibold tracking-wide">
+            Categorias
+          </h2>
+        </div>
+        
+        <ul className="space-y-2.5">
           {categories.map((item) => {
             const active = isActive(item);
+            const IconComponent = item.icon;
+            
             return (
               <li key={item.id}>
                 <button
@@ -81,15 +104,13 @@ export default function NewsSidebar() {
                     w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors
                     ${
                       active
-                        ? 'bg-blue-50 text-blue-700 font-medium'
-                        : 'text-gray-700 hover:bg-gray-100'
+                        ? 'bg-blue-50 text-blue-700 font-semibold'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-800'
                     }
                   `}
                   aria-current={active ? 'page' : undefined}
                 >
-                  <span className="text-lg" role="img" aria-hidden="true">
-                    {item.emoji}
-                  </span>
+                  <IconComponent className="w-5 h-5" />
                   <span className="text-sm">{item.label}</span>
                 </button>
               </li>
