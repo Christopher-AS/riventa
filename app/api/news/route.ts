@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 type NewsArticle = {
   title: string;
@@ -27,7 +27,20 @@ type ClaudeResponse = {
   }>;
 };
 
-export async function GET() {
+// Whitelist de valores válidos
+const VALID_CATEGORIES = new Set([
+  "business",
+  "entertainment",
+  "general",
+  "health",
+  "science",
+  "sports",
+  "technology",
+]);
+
+const VALID_COUNTRIES = new Set(["br", "us"]);
+
+export async function GET(request: NextRequest) {
   try {
     const newsApiKey = process.env.NEWS_API_KEY;
     const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
@@ -46,51 +59,81 @@ export async function GET() {
       );
     }
 
-    // 1. Buscar notícias do Brasil e EUA em paralelo
-    const newsUrlBR = "https://newsapi.org/v2/top-headlines?country=br&pageSize=10";
-    const newsUrlUS = "https://newsapi.org/v2/top-headlines?country=us&pageSize=10";
+    // 1. Ler e validar query params
+    const searchParams = request.nextUrl.searchParams;
+    const categoryParam = searchParams.get("category");
+    const countryParam = searchParams.get("country");
 
-    const [newsResponseBR, newsResponseUS] = await Promise.all([
-      fetch(newsUrlBR, {
+    // Validar category (ignorar se inválido)
+    const category =
+      categoryParam && VALID_CATEGORIES.has(categoryParam)
+        ? categoryParam
+        : null;
+
+    // Validar country (ignorar se inválido)
+    const country =
+      countryParam && VALID_COUNTRIES.has(countryParam) ? countryParam : null;
+
+    // 2. Determinar quais países buscar
+    const countriesToFetch: string[] = country ? [country] : ["br", "us"];
+
+    // 3. Construir URLs de busca
+    const fetchPromises = countriesToFetch.map((countryCode) => {
+      let url = `https://newsapi.org/v2/top-headlines?country=${countryCode}&pageSize=10`;
+
+      // Adicionar categoria se fornecida
+      if (category) {
+        url += `&category=${category}`;
+      }
+
+      return fetch(url, {
         headers: {
           "X-Api-Key": newsApiKey,
         },
-      }),
-      fetch(newsUrlUS, {
-        headers: {
-          "X-Api-Key": newsApiKey,
-        },
-      }),
-    ]);
+      });
+    });
 
-    if (!newsResponseBR.ok) {
-      throw new Error(`NewsAPI BR error: ${newsResponseBR.status}`);
+    // 4. Buscar notícias em paralelo
+    const newsResponses = await Promise.all(fetchPromises);
+
+    // 5. Validar respostas
+    for (let i = 0; i < newsResponses.length; i++) {
+      if (!newsResponses[i].ok) {
+        throw new Error(
+          `NewsAPI error for ${countriesToFetch[i]}: ${newsResponses[i].status}`
+        );
+      }
     }
 
-    if (!newsResponseUS.ok) {
-      throw new Error(`NewsAPI US error: ${newsResponseUS.status}`);
-    }
+    // 6. Parsear JSON de todas as respostas
+    const newsDataArray: NewsAPIResponse[] = await Promise.all(
+      newsResponses.map((res) => res.json())
+    );
 
-    const newsDataBR: NewsAPIResponse = await newsResponseBR.json();
-    const newsDataUS: NewsAPIResponse = await newsResponseUS.json();
+    // 7. Mesclar artigos de todos os países
+    const allArticles = newsDataArray.flatMap((data) => data.articles || []);
 
-    // 2. Mesclar os artigos dos dois países
-    const allArticles = [
-      ...(newsDataBR.articles || []),
-      ...(newsDataUS.articles || []),
-    ];
+    // 8. Deduplicar artigos por URL
+    const seenUrls = new Set<string>();
+    const uniqueArticles = allArticles.filter((article) => {
+      if (seenUrls.has(article.url)) {
+        return false;
+      }
+      seenUrls.add(article.url);
+      return true;
+    });
 
-    if (allArticles.length === 0) {
+    if (uniqueArticles.length === 0) {
       return NextResponse.json({
         ok: false,
         error: "Nenhuma notícia encontrada",
       });
     }
 
-    // 3. Identificar a imagem mais comum
+    // 9. Identificar a imagem mais comum
     const imageCount = new Map<string, number>();
-    
-    for (const article of allArticles) {
+
+    for (const article of uniqueArticles) {
       if (article.urlToImage) {
         const count = imageCount.get(article.urlToImage) || 0;
         imageCount.set(article.urlToImage, count + 1);
@@ -109,12 +152,12 @@ export async function GET() {
 
     // Se não houver imagem comum, usar a primeira disponível
     if (!mostCommonImage) {
-      const firstWithImage = allArticles.find((a) => a.urlToImage);
+      const firstWithImage = uniqueArticles.find((a) => a.urlToImage);
       mostCommonImage = firstWithImage?.urlToImage || null;
     }
 
-    // 4. Preparar texto para Claude sintetizar
-    const newsTexts = allArticles
+    // 10. Preparar texto para Claude sintetizar
+    const newsTexts = uniqueArticles
       .map((article, idx) => {
         return `Notícia ${idx + 1}:\nTítulo: ${article.title}\nDescrição: ${article.description || "N/A"}`;
       })
@@ -126,47 +169,55 @@ ${newsTexts}
 
 Responda APENAS com os parágrafos em HTML, sem introduções ou comentários adicionais.`;
 
-    // 5. Chamar Claude API
-    const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": anthropicApiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1024,
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-      }),
-    });
+    // 11. Chamar Claude API
+    const claudeResponse = await fetch(
+      "https://api.anthropic.com/v1/messages",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": anthropicApiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1024,
+          messages: [
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+        }),
+      }
+    );
 
     if (!claudeResponse.ok) {
       const errorText = await claudeResponse.text();
-      throw new Error(`Claude API error: ${claudeResponse.status} - ${errorText}`);
+      throw new Error(
+        `Claude API error: ${claudeResponse.status} - ${errorText}`
+      );
     }
 
     const claudeData: ClaudeResponse = await claudeResponse.json();
 
     const synthesizedContent =
-      claudeData.content?.[0]?.text || "<p>Não foi possível sintetizar o conteúdo.</p>";
+      claudeData.content?.[0]?.text ||
+      "<p>Não foi possível sintetizar o conteúdo.</p>";
 
-    // 6. Preparar sources
-    const sources = allArticles.map((article) => ({
+    // 12. Preparar sources
+    const sources = uniqueArticles.map((article) => ({
       name: article.source.name,
       url: article.url,
     }));
 
-    // 7. Gerar título e subtítulo (usar o título da primeira notícia como base)
-    const mainTitle = allArticles[0]?.title || "Notícias do Brasil e EUA";
-    const subtitle = allArticles[0]?.description || "Resumo das principais notícias";
+    // 13. Gerar título e subtítulo (usar o título da primeira notícia como base)
+    const mainTitle =
+      uniqueArticles[0]?.title || "Notícias do Brasil e EUA";
+    const subtitle =
+      uniqueArticles[0]?.description || "Resumo das principais notícias";
 
-    // 8. Retornar resposta estruturada
+    // 14. Retornar resposta estruturada
     return NextResponse.json({
       ok: true,
       title: mainTitle,
