@@ -34,17 +34,40 @@ export default function Sidebar() {
 
   return (
     <>
-      <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-gray-200 p-6">
+      <aside className={`fixed left-0 top-0 h-screen bg-white border-r border-gray-200 p-6 transition-all duration-300 ${isSearchOpen ? 'w-20' : 'w-64'}`}>
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-blue-600">Riventa</h1>
-          <p className="text-sm text-gray-500 mt-1">Social + News</p>
+          {isSearchOpen ? (
+            <h1 className="text-2xl font-bold text-blue-600 text-center">R</h1>
+          ) : (
+            <>
+              <h1 className="text-2xl font-bold text-blue-600">Riventa</h1>
+              <p className="text-sm text-gray-500 mt-1">Social + News</p>
+            </>
+          )}
         </div>
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+          className={`w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors ${isSearchOpen ? 'flex items-center justify-center' : ''}`}
         >
-          Criar Post
+          {isSearchOpen ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 4.5v15m7.5-7.5h-15"
+              />
+            </svg>
+          ) : (
+            'Criar Post'
+          )}
         </button>
 
         <button
@@ -65,21 +88,23 @@ export default function Sidebar() {
               d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
             />
           </svg>
-          Buscar
+          {!isSearchOpen && 'Buscar'}
         </button>
 
         {/* Informações do usuário */}
-        <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-          <p className="text-sm font-medium text-gray-900">
-            {session?.user?.email}
-          </p>
-          <button
-            onClick={() => signOut({ callbackUrl: "/login" })}
-            className="mt-2 text-sm text-red-600 hover:text-red-700"
-          >
-            Sair
-          </button>
-        </div>
+        {!isSearchOpen && (
+          <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm font-medium text-gray-900">
+              {session?.user?.email}
+            </p>
+            <button
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="mt-2 text-sm text-red-600 hover:text-red-700"
+            >
+              Sair
+            </button>
+          </div>
+        )}
       </aside>
 
       <CreatePostModal
