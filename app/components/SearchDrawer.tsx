@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SearchBar from "./SearchBar";
 
 type SearchDrawerProps = {
@@ -9,6 +9,18 @@ type SearchDrawerProps = {
 };
 
 export default function SearchDrawer({ isOpen, onClose }: SearchDrawerProps) {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   return (
     <>
       {/* Overlay */}
