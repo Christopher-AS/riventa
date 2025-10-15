@@ -46,31 +46,51 @@ export async function GET() {
       );
     }
 
-    // 1. Buscar notícias do NewsAPI
-    const newsUrl = "https://newsapi.org/v2/top-headlines?country=br&pageSize=10";
-    const newsResponse = await fetch(newsUrl, {
-      headers: {
-        "X-Api-Key": newsApiKey,
-      },
-    });
+    // 1. Buscar notícias do Brasil e EUA em paralelo
+    const newsUrlBR = "https://newsapi.org/v2/top-headlines?country=br&pageSize=10";
+    const newsUrlUS = "https://newsapi.org/v2/top-headlines?country=us&pageSize=10";
 
-    if (!newsResponse.ok) {
-      throw new Error(`NewsAPI error: ${newsResponse.status}`);
+    const [newsResponseBR, newsResponseUS] = await Promise.all([
+      fetch(newsUrlBR, {
+        headers: {
+          "X-Api-Key": newsApiKey,
+        },
+      }),
+      fetch(newsUrlUS, {
+        headers: {
+          "X-Api-Key": newsApiKey,
+        },
+      }),
+    ]);
+
+    if (!newsResponseBR.ok) {
+      throw new Error(`NewsAPI BR error: ${newsResponseBR.status}`);
     }
 
-    const newsData: NewsAPIResponse = await newsResponse.json();
+    if (!newsResponseUS.ok) {
+      throw new Error(`NewsAPI US error: ${newsResponseUS.status}`);
+    }
 
-    if (!newsData.articles || newsData.articles.length === 0) {
+    const newsDataBR: NewsAPIResponse = await newsResponseBR.json();
+    const newsDataUS: NewsAPIResponse = await newsResponseUS.json();
+
+    // 2. Mesclar os artigos dos dois países
+    const allArticles = [
+      ...(newsDataBR.articles || []),
+      ...(newsDataUS.articles || []),
+    ];
+
+    if (allArticles.length === 0) {
       return NextResponse.json({
         ok: false,
         error: "Nenhuma notícia encontrada",
       });
     }
 
-    // 2. Identificar a imagem mais comum
+    // 3. Identificar a imagem mais comum
     const imageCount = new Map<string, number>();
     
-    for (const article of newsData.articles) {
+    for (const article of allArticles) {
       if (article.urlToImage) {
         const count = imageCount.get(article.urlToImage) || 0;
         imageCount.set(article.urlToImage, count + 1);
@@ -89,24 +109,24 @@ export async function GET() {
 
     // Se não houver imagem comum, usar a primeira disponível
     if (!mostCommonImage) {
-      const firstWithImage = newsData.articles.find((a) => a.urlToImage);
+      const firstWithImage = allArticles.find((a) => a.urlToImage);
       mostCommonImage = firstWithImage?.urlToImage || null;
     }
 
-    // 3. Preparar texto para Claude sintetizar
-    const newsTexts = newsData.articles
+    // 4. Preparar texto para Claude sintetizar
+    const newsTexts = allArticles
       .map((article, idx) => {
         return `Notícia ${idx + 1}:\nTítulo: ${article.title}\nDescrição: ${article.description || "N/A"}`;
       })
       .join("\n\n");
 
-    const prompt = `Você receberá várias notícias recentes do Brasil. Analise-as e sintetize o tema principal em 3-4 parágrafos conexos e informativos. Use HTML com tags <p> para cada parágrafo. Seja objetivo e jornalístico.
+    const prompt = `Você receberá várias notícias recentes do Brasil e dos Estados Unidos. Analise-as e sintetize o tema principal em 3-4 parágrafos conexos e informativos. Use HTML com tags <p> para cada parágrafo. Seja objetivo e jornalístico.
 
 ${newsTexts}
 
 Responda APENAS com os parágrafos em HTML, sem introduções ou comentários adicionais.`;
 
-    // 4. Chamar Claude API
+    // 5. Chamar Claude API
     const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -136,17 +156,17 @@ Responda APENAS com os parágrafos em HTML, sem introduções ou comentários ad
     const synthesizedContent =
       claudeData.content?.[0]?.text || "<p>Não foi possível sintetizar o conteúdo.</p>";
 
-    // 5. Preparar sources
-    const sources = newsData.articles.map((article) => ({
+    // 6. Preparar sources
+    const sources = allArticles.map((article) => ({
       name: article.source.name,
       url: article.url,
     }));
 
-    // 6. Gerar título e subtítulo (usar o título da primeira notícia como base)
-    const mainTitle = newsData.articles[0]?.title || "Notícias do Brasil";
-    const subtitle = newsData.articles[0]?.description || "Resumo das principais notícias";
+    // 7. Gerar título e subtítulo (usar o título da primeira notícia como base)
+    const mainTitle = allArticles[0]?.title || "Notícias do Brasil e EUA";
+    const subtitle = allArticles[0]?.description || "Resumo das principais notícias";
 
-    // 7. Retornar resposta estruturada
+    // 8. Retornar resposta estruturada
     return NextResponse.json({
       ok: true,
       title: mainTitle,
