@@ -200,6 +200,7 @@ export default async function Page({
   const pageTitle = getPageTitle(category, country);
 
   const newsData = await fetchNews(category, country);
+  const articles = newsData?.articles ?? [];
 
   return (
     <div className="flex gap-8">
@@ -222,7 +223,7 @@ export default async function Page({
               </button>
             </div>
           </div>
-        ) : newsData.articles.length === 0 ? (
+        ) : articles.length === 0 ? (
           <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center">
             <p className="text-gray-600">
               Nenhuma notícia encontrada para este filtro.
@@ -230,7 +231,7 @@ export default async function Page({
           </div>
         ) : (
           <div className="space-y-4">
-            {newsData.articles.map((article, index) => (
+            {articles.map((article, index) => (
               <NewsCard key={`${article.url}-${index}`} article={article} />
             ))}
           </div>
