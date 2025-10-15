@@ -1,3 +1,5 @@
+import NewsSidebar from "@/components/news/NewsSidebar";
+
 export const dynamic = "force-dynamic";
 
 type NewsArticle = {
@@ -69,66 +71,6 @@ function getPageTitle(category?: string, country?: string): string {
   }
   
   return "NewsExplorer — Início";
-}
-
-function NewsSidebar({
-  currentCategory,
-  currentCountry,
-}: {
-  currentCategory?: string;
-  currentCountry?: string;
-}) {
-  return (
-    <aside className="w-64 flex-shrink-0 space-y-6">
-      <div>
-        <h2 className="mb-3 text-sm font-semibold text-gray-900">Categorias</h2>
-        <nav className="space-y-1">
-          {CATEGORIES.map((cat) => {
-            const isActive = currentCategory === cat.id || (!currentCategory && cat.id === "general");
-            const href = cat.id === "general" ? "/news" : `/news?category=${cat.id}`;
-            
-            return (
-              <a
-                key={cat.id}
-                href={href}
-                className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
-                  isActive
-                    ? "bg-blue-50 font-medium text-blue-600"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                {cat.label}
-              </a>
-            );
-          })}
-        </nav>
-      </div>
-
-      <div>
-        <h2 className="mb-3 text-sm font-semibold text-gray-900">Região</h2>
-        <nav className="space-y-1">
-          {COUNTRIES.map((country) => {
-            const isActive = currentCountry === country.id;
-            const href = `/news?country=${country.id}`;
-            
-            return (
-              <a
-                key={country.id}
-                href={href}
-                className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
-                  isActive
-                    ? "bg-blue-50 font-medium text-blue-600"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                {country.label}
-              </a>
-            );
-          })}
-        </nav>
-      </div>
-    </aside>
-  );
 }
 
 function NewsCardSkeleton() {
@@ -204,7 +146,7 @@ export default async function Page({
 
   return (
     <div className="flex gap-8">
-      <NewsSidebar currentCategory={category} currentCountry={country} />
+      <NewsSidebar />
 
       <main role="main" className="flex-1 space-y-6">
         <h1 className="text-2xl font-bold text-gray-900">{pageTitle}</h1>
