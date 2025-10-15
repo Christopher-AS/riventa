@@ -33,7 +33,12 @@ export default function Sidebar() {
 
   const userId = session?.user?.id || "";
 
-  const isActive = (path: string) => pathname === path;
+  const isActive = (path: string | RegExp) => {
+    if (typeof path === 'string') {
+      return pathname === path;
+    }
+    return path.test(pathname);
+  };
 
   return (
     <>
@@ -112,9 +117,15 @@ export default function Sidebar() {
 
           {/* Perfil */}
           <button
-            onClick={() => router.push('/profile')}
+            onClick={() => {
+              if (userId) {
+                router.push(`/u/${userId}`);
+              } else {
+                router.push('/api/auth/signin');
+              }
+            }}
             className={`w-full px-4 py-3 rounded-lg font-medium transition-colors flex items-center gap-3 ${
-              isActive('/profile')
+              isActive(/^\/u\/[^/]+$/)
                 ? 'bg-blue-100 text-blue-600'
                 : 'text-gray-700 hover:bg-gray-100'
             }`}
