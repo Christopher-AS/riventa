@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import CreatePostModal from "./CreatePostModal";
 import SearchDrawer from "./SearchDrawer";
 
@@ -11,6 +11,7 @@ export default function Sidebar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { data: session, status } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
 
   // Se não estiver logado, redireciona para login
   if (status === "unauthenticated") {
@@ -32,6 +33,8 @@ export default function Sidebar() {
 
   const userId = session?.user?.id || "";
 
+  const isActive = (path: string) => pathname === path;
+
   return (
     <>
       <aside className={`fixed left-0 top-0 h-screen bg-white border-r border-gray-200 p-6 transition-all duration-300 ${isSearchOpen ? 'w-20' : 'w-64'}`}>
@@ -48,7 +51,7 @@ export default function Sidebar() {
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className={`w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors ${isSearchOpen ? 'flex items-center justify-center' : ''}`}
+          className={`w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors mb-6 ${isSearchOpen ? 'flex items-center justify-center' : ''}`}
         >
           {isSearchOpen ? (
             <svg
@@ -70,26 +73,69 @@ export default function Sidebar() {
           )}
         </button>
 
-        <button
-          onClick={() => setIsSearchOpen(true)}
-          className="w-full mt-3 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="w-5 h-5"
+        {/* Navigation Buttons */}
+        <nav className="space-y-2">
+          {/* Home */}
+          <button
+            onClick={() => router.push('/')}
+            className={`w-full px-4 py-3 rounded-lg font-medium transition-colors flex items-center gap-3 ${
+              isActive('/') 
+                ? 'bg-blue-100 text-blue-600' 
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-            />
-          </svg>
-          {!isSearchOpen && 'Buscar'}
-        </button>
+            <span className="text-xl">🏠</span>
+            {!isSearchOpen && <span>Home</span>}
+          </button>
+
+          {/* Buscar */}
+          <button
+            onClick={() => setIsSearchOpen(true)}
+            className={`w-full px-4 py-3 rounded-lg font-medium transition-colors flex items-center gap-3 ${
+              isSearchOpen
+                ? 'bg-blue-100 text-blue-600'
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            <span className="text-xl">🔍</span>
+            {!isSearchOpen && <span>Buscar</span>}
+          </button>
+
+          {/* Mensagens */}
+          <button
+            onClick={() => {}}
+            className="w-full px-4 py-3 rounded-lg font-medium transition-colors flex items-center gap-3 text-gray-700 hover:bg-gray-100"
+          >
+            <span className="text-xl">💬</span>
+            {!isSearchOpen && <span>Mensagens</span>}
+          </button>
+
+          {/* Perfil */}
+          <button
+            onClick={() => router.push('/profile')}
+            className={`w-full px-4 py-3 rounded-lg font-medium transition-colors flex items-center gap-3 ${
+              isActive('/profile')
+                ? 'bg-blue-100 text-blue-600'
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            <span className="text-xl">👤</span>
+            {!isSearchOpen && <span>Perfil</span>}
+          </button>
+
+          {/* NewsExplorer */}
+          <button
+            onClick={() => router.push('/news')}
+            className={`w-full px-4 py-3 rounded-lg font-medium transition-colors flex items-center gap-3 ${
+              isActive('/news')
+                ? 'bg-blue-100 text-blue-600'
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            <span className="text-xl">📰</span>
+            {!isSearchOpen && <span>NewsExplorer</span>}
+          </button>
+        </nav>
 
         {/* Informações do usuário */}
         {!isSearchOpen && (
