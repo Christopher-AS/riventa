@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import FollowButton from "./FollowButton";
+import Link from "next/link";
 
 type SearchResult = {
   id: string;
@@ -73,9 +73,6 @@ export default function SearchBar() {
     return () => clearTimeout(timer);
   }, [query]);
 
-  // TODO: Pegar viewerId da sessão real
-  const viewerId = "cm2qvvm6z0000ksy97tg0yx3a"; // Alice temporário
-
   return (
     <div className="relative w-full max-w-md" ref={dropdownRef}>
       <div className="relative">
@@ -129,33 +126,38 @@ export default function SearchBar() {
       </div>
 
       {showDropdown && results.length > 0 && (
-        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto">
-          {results.map((user) => {
-            const name = user.profile?.name || user.email;
-            const avatar =
-              user.profile?.avatar ||
-              `https://i.pravatar.cc/150?u=${user.email}`;
+        <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+          <div className="max-h-96 overflow-y-auto">
+            {results.map((user) => {
+              const name = user.profile?.name || user.email;
+              const avatar =
+                user.profile?.avatar ||
+                `https://i.pravatar.cc/150?u=${user.email}`;
 
-            return (
-              <div
-                key={user.id}
-                className="flex items-center gap-3 p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
-              >
-                <img
-                  src={avatar}
-                  alt={name}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-900 truncate">
-                    {name}
-                  </p>
-                  <p className="text-sm text-gray-500 truncate">{user.email}</p>
-                </div>
-                <FollowButton targetUserId={user.id} viewerId={viewerId} />
-              </div>
-            );
-          })}
+              return (
+                <Link
+                  key={user.id}
+                  href={`/u/${user.id}`}
+                  className="flex items-center gap-3 p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                  onClick={() => setShowDropdown(false)}
+                >
+                  <img
+                    src={avatar}
+                    alt={name}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 truncate">
+                      {name}
+                    </p>
+                    <p className="text-sm text-gray-500 truncate">
+                      {user.email}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       )}
 
