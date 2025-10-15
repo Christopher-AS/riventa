@@ -21,8 +21,8 @@ export default function SearchDrawer({ isOpen, onClose }: SearchDrawerProps) {
 
       {/* Drawer */}
       <div
-        className={`fixed right-0 top-0 h-full w-96 bg-white shadow-xl z-50 transition-transform duration-300 ease-in-out ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+        className={`fixed left-0 top-0 h-full w-96 bg-white shadow-xl z-50 transition-transform duration-300 ease-in-out ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Header */}
