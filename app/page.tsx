@@ -3,10 +3,44 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
+import NewsCard from "@/components/NewsCard";
+
+type NewsData = {
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  content: string;
+  sources: Array<{
+    name: string;
+    url: string;
+  }>;
+};
+
+async function getNews(): Promise<NewsData | null> {
+  try {
+    const res = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/news`, {
+      cache: 'no-store',
+    });
+    
+    if (!res.ok) {
+      console.error('Erro ao buscar notícias:', res.status);
+      return null;
+    }
+    
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error('Erro ao buscar notícias:', error);
+    return null;
+  }
+}
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
   const userId = (session?.user as any)?.id ?? null;
+
+  // Buscar notícias
+  const newsData = await getNews();
 
   let posts: Array<{
     id: string;
@@ -107,6 +141,18 @@ export default async function Home() {
         </div>
       )}
 
+      {/* Seção de Notícias */}
+      {newsData && (
+        <NewsCard
+          title={newsData.title}
+          subtitle={newsData.subtitle}
+          imageUrl={newsData.imageUrl}
+          content={newsData.content}
+          sources={newsData.sources}
+        />
+      )}
+
+      {/* Posts Sociais */}
       {posts.map((p) => (
         <article key={p.id} className="rounded-xl border p-4">
           <header className="flex items-center gap-3">
