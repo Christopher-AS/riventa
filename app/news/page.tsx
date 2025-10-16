@@ -1,7 +1,8 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import NewsSidebar from "@/components/news/NewsSidebar";
 import { Newspaper } from "lucide-react";
-
-export const dynamic = "force-dynamic";
 
 type NewsArticle = {
   title: string;
@@ -32,33 +33,6 @@ const COUNTRIES = [
   { id: "br", label: "Brasil" },
   { id: "us", label: "Mundo" },
 ];
-
-async function fetchNews(category?: string, country?: string): Promise<NewsResponse | null> {
-  try {
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-    const params = new URLSearchParams();
-    
-    if (category) params.set("category", category);
-    if (country) params.set("country", country);
-    
-    const queryString = params.toString();
-    const url = `${baseUrl}/api/news${queryString ? `?${queryString}` : ""}`;
-    
-    const res = await fetch(url, {
-      cache: "no-store",
-    });
-
-    if (!res.ok) {
-      console.error("Erro ao buscar notícias:", res.status);
-      return null;
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Erro ao buscar notícias:", error);
-    return null;
-  }
-}
 
 function NewsCardSkeleton() {
   return (
@@ -120,15 +94,50 @@ function NewsCard({ article }: { article: NewsArticle }) {
   );
 }
 
-export default async function Page({
+export default function Page({
   searchParams,
 }: {
   searchParams: { category?: string; country?: string };
 }) {
   const { category, country } = searchParams;
+  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [articles, setArticles] = useState<NewsArticle[]>([]);
 
-  const newsData = await fetchNews(category, country);
-  const articles = newsData?.articles ?? [];
+  useEffect(() => {
+    async function fetchNews() {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const params = new URLSearchParams();
+        if (category) params.set("category", category);
+        if (country) params.set("country", country);
+        
+        const queryString = params.toString();
+        const url = `/api/news${queryString ? `?${queryString}` : ""}`;
+        
+        const res = await fetch(url, {
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          throw new Error(`Erro ao buscar notícias: ${res.status}`);
+        }
+
+        const data: NewsResponse = await res.json();
+        setArticles(data.articles ?? []);
+      } catch (err) {
+        console.error("Erro ao buscar notícias:", err);
+        setError("Erro ao carregar notícias. Por favor, tente novamente.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchNews();
+  }, [category, country]);
 
   return (
     <div className="flex gap-8">
@@ -140,12 +149,18 @@ export default async function Page({
           NewsExplorer
         </h1>
 
-        {!newsData ? (
+        {loading ? (
+          <div className="space-y-4">
+            <NewsCardSkeleton />
+            <NewsCardSkeleton />
+            <NewsCardSkeleton />
+            <NewsCardSkeleton />
+            <NewsCardSkeleton />
+          </div>
+        ) : error ? (
           <div className="space-y-4">
             <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
-              <p className="text-sm text-red-800">
-                Erro ao carregar notícias. Por favor, tente novamente.
-              </p>
+              <p className="text-sm text-red-800">{error}</p>
               <button
                 onClick={() => window.location.reload()}
                 className="mt-2 text-sm font-medium text-red-600 hover:text-red-700"
