@@ -3,44 +3,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import NewsCard from "@/components/NewsCard";
-
-type NewsData = {
-  title: string;
-  subtitle: string;
-  imageUrl: string;
-  content: string;
-  sources: Array<{
-    name: string;
-    url: string;
-  }>;
-};
-
-async function getNews(): Promise<NewsData | null> {
-  try {
-    const res = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/news`, {
-      cache: 'no-store',
-    });
-    
-    if (!res.ok) {
-      console.error('Erro ao buscar notícias:', res.status);
-      return null;
-    }
-    
-    const data = await res.json();
-    return data;
-  } catch (error) {
-    console.error('Erro ao buscar notícias:', error);
-    return null;
-  }
-}
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
   const userId = (session?.user as any)?.id ?? null;
-
-  // Buscar notícias
-  const newsData = await getNews();
 
   let posts: Array<{
     id: string;
@@ -80,11 +46,16 @@ export default async function Home() {
     });
 
     // Query 2: Posts de descoberta (usuários que NÃO segue)
-    // Ordenados por engajamento (likes + comments)
-    const allDiscoveryPosts = await prisma.post.findMany({
+    // Ordenados por engajamento (likes + comments) direto no banco
+    const discoveryPosts = await prisma.post.findMany({
       where: {
         authorId: { notIn: [...followingIds, userId] },
       },
+      orderBy: [
+        { likes: { _count: 'desc' } },
+        { comments: { _count: 'desc' } }
+      ],
+      take: 20,
       include: {
         author: {
           select: {
@@ -96,21 +67,17 @@ export default async function Home() {
         _count: { select: { likes: true, comments: true } },
       },
     });
-
-    // Ordenar por engajamento (likes + comments) e pegar top 20
-    const discoveryPosts = allDiscoveryPosts
-      .sort((a, b) => {
-        const engagementA = a._count.likes + a._count.comments;
-        const engagementB = b._count.likes + b._count.comments;
-        return engagementB - engagementA;
-      })
-      .slice(0, 20);
 
     // Combinar os dois feeds
     posts = [...followingPosts, ...discoveryPosts];
   } else {
     // Sem login: mostrar apenas discovery posts ordenados por engajamento
-    const allPosts = await prisma.post.findMany({
+    posts = await prisma.post.findMany({
+      orderBy: [
+        { likes: { _count: 'desc' } },
+        { comments: { _count: 'desc' } }
+      ],
+      take: 20,
       include: {
         author: {
           select: {
@@ -122,15 +89,6 @@ export default async function Home() {
         _count: { select: { likes: true, comments: true } },
       },
     });
-
-    // Ordenar por engajamento e pegar top 20
-    posts = allPosts
-      .sort((a, b) => {
-        const engagementA = a._count.likes + a._count.comments;
-        const engagementB = b._count.likes + b._count.comments;
-        return engagementB - engagementA;
-      })
-      .slice(0, 20);
   }
 
   return (
@@ -139,17 +97,6 @@ export default async function Home() {
         <div className="rounded-lg border p-3 text-sm">
           Faça login para ver seu feed personalizado. Exibindo posts populares.
         </div>
-      )}
-
-      {/* Seção de Notícias */}
-      {newsData && (
-        <NewsCard
-          title={newsData.title}
-          subtitle={newsData.subtitle}
-          imageUrl={newsData.imageUrl}
-          content={newsData.content}
-          sources={newsData.sources}
-        />
       )}
 
       {/* Posts Sociais */}
