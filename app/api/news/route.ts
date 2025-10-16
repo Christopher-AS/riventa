@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
 
     // 3. Construir URLs de busca
     const fetchPromises = countriesToFetch.map((countryCode) => {
-      let url = `https://newsapi.org/v2/top-headlines?country=${countryCode}&pageSize=10`;
+      let url = `https://newsapi.org/v2/top-headlines?country=${countryCode}&pageSize=5`;
 
       // Adicionar categoria se fornecida
       if (category) {
@@ -171,11 +171,9 @@ export async function GET(request: NextRequest) {
       })
       .join("\n\n");
 
-    const prompt = `Você receberá várias notícias recentes do Brasil e dos Estados Unidos. Analise-as e sintetize o tema principal em 3-4 parágrafos conexos e informativos. Use HTML com tags <p> para cada parágrafo. Seja objetivo e jornalístico.
+    const prompt = `Sintetize estas notícias em 2 parágrafos curtos com HTML <p>. Seja direto e conciso.
 
-${newsTexts}
-
-Responda APENAS com os parágrafos em HTML, sem introduções ou comentários adicionais.`;
+${newsTexts}`;
 
     console.log('[PERF] API News: Chamando Claude...', new Date().toISOString());
 
@@ -191,7 +189,7 @@ Responda APENAS com os parágrafos em HTML, sem introduções ou comentários ad
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
-          max_tokens: 1024,
+          max_tokens: 400,
           messages: [
             {
               role: "user",
