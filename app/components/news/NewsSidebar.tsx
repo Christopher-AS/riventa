@@ -69,12 +69,7 @@ export default function NewsSidebar() {
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col overflow-y-auto">
-      <div className="p-4 space-y-4">
-        <div className="flex items-center gap-2">
-          <Newspaper className="w-5 h-5 text-gray-700" />
-          <h1 className="text-lg font-bold text-gray-900">NewsExplorer</h1>
-        </div>
-        
+      <div className="p-4 mb-6">
         <button
           onClick={handleBackToSocial}
           className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg py-2 w-full flex items-center justify-center gap-2 transition"
