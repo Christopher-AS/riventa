@@ -41,6 +41,8 @@ const VALID_CATEGORIES = new Set([
 const VALID_COUNTRIES = new Set(["br", "us"]);
 
 export async function GET(request: NextRequest) {
+  console.log('[PERF] API News: Início:', new Date().toISOString());
+  
   try {
     const newsApiKey = process.env.NEWS_API_KEY;
     const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
@@ -74,6 +76,8 @@ export async function GET(request: NextRequest) {
     const country =
       countryParam && VALID_COUNTRIES.has(countryParam) ? countryParam : null;
 
+    console.log('[PERF] API News: Params validados:', new Date().toISOString());
+
     // 2. Determinar quais países buscar
     const countriesToFetch: string[] = country ? [country] : ["br", "us"];
 
@@ -93,8 +97,12 @@ export async function GET(request: NextRequest) {
       });
     });
 
+    console.log('[PERF] API News: Buscando NewsAPI...', new Date().toISOString());
+
     // 4. Buscar notícias em paralelo
     const newsResponses = await Promise.all(fetchPromises);
+
+    console.log('[PERF] API News: NewsAPI concluído:', new Date().toISOString());
 
     // 5. Validar respostas
     for (let i = 0; i < newsResponses.length; i++) {
@@ -169,6 +177,8 @@ ${newsTexts}
 
 Responda APENAS com os parágrafos em HTML, sem introduções ou comentários adicionais.`;
 
+    console.log('[PERF] API News: Chamando Claude...', new Date().toISOString());
+
     // 11. Chamar Claude API
     const claudeResponse = await fetch(
       "https://api.anthropic.com/v1/messages",
@@ -201,6 +211,8 @@ Responda APENAS com os parágrafos em HTML, sem introduções ou comentários ad
 
     const claudeData: ClaudeResponse = await claudeResponse.json();
 
+    console.log('[PERF] API News: Claude concluído:', new Date().toISOString());
+
     const synthesizedContent =
       claudeData.content?.[0]?.text ||
       "<p>Não foi possível sintetizar o conteúdo.</p>";
@@ -216,6 +228,8 @@ Responda APENAS com os parágrafos em HTML, sem introduções ou comentários ad
       uniqueArticles[0]?.title || "Notícias do Brasil e EUA";
     const subtitle =
       uniqueArticles[0]?.description || "Resumo das principais notícias";
+
+    console.log('[PERF] API News: Fim:', new Date().toISOString());
 
     // 14. Retornar resposta estruturada
     return NextResponse.json({
