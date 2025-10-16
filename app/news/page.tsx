@@ -1,4 +1,5 @@
 import NewsSidebar from "@/components/news/NewsSidebar";
+import { Newspaper } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -57,20 +58,6 @@ async function fetchNews(category?: string, country?: string): Promise<NewsRespo
     console.error("Erro ao buscar notícias:", error);
     return null;
   }
-}
-
-function getPageTitle(category?: string, country?: string): string {
-  if (category) {
-    const cat = CATEGORIES.find((c) => c.id === category);
-    return `NewsExplorer — ${cat?.label || category}`;
-  }
-  
-  if (country) {
-    const cnt = COUNTRIES.find((c) => c.id === country);
-    return `NewsExplorer — ${cnt?.label || country}`;
-  }
-  
-  return "NewsExplorer — Início";
 }
 
 function NewsCardSkeleton() {
@@ -139,7 +126,6 @@ export default async function Page({
   searchParams: { category?: string; country?: string };
 }) {
   const { category, country } = searchParams;
-  const pageTitle = getPageTitle(category, country);
 
   const newsData = await fetchNews(category, country);
   const articles = newsData?.articles ?? [];
@@ -149,7 +135,10 @@ export default async function Page({
       <NewsSidebar />
 
       <main role="main" className="flex-1 space-y-6">
-        <h1 className="text-2xl font-bold text-gray-900">{pageTitle}</h1>
+        <h1 className="flex items-center gap-2 text-xl font-semibold text-gray-900">
+          <Newspaper className="h-6 w-6" />
+          NewsExplorer
+        </h1>
 
         {!newsData ? (
           <div className="space-y-4">
