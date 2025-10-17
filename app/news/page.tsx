@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import NewsSidebar from "@/components/news/NewsSidebar";
 import { Newspaper } from "lucide-react";
 
@@ -59,10 +60,8 @@ function NewsCard({ article }: { article: NewsArticle }) {
 
   return (
     <article className="rounded-2xl border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md">
-      <a
-        href={article.url}
-        target="_blank"
-        rel="noopener noreferrer"
+      <Link
+        href={`/news/${encodeURIComponent(article.title)}`}
         className="flex gap-4"
       >
         {article.urlToImage && (
@@ -89,7 +88,7 @@ function NewsCard({ article }: { article: NewsArticle }) {
             <time dateTime={article.publishedAt}>{date}</time>
           </div>
         </div>
-      </a>
+      </Link>
     </article>
   );
 }
