@@ -35,12 +35,17 @@ export async function GET(
     // Decodifica o ID que pode ser um título codificado
     const decodedId = decodeURIComponent(id);
 
+    console.log("[PERF] Buscando notícias da NewsAPI...");
+    const startNewsApi = Date.now();
+
     // Busca notícias recentes e tenta encontrar a correspondente
     const url = `https://newsapi.org/v2/top-headlines?country=br&apiKey=${newsApiKey}&pageSize=100`;
     
     const response = await fetch(url, {
       next: { revalidate: 300 }, // Cache por 5 minutos
     });
+
+    console.log(`[PERF] NewsAPI respondeu em ${Date.now() - startNewsApi}ms`);
 
     if (!response.ok) {
       return NextResponse.json(
@@ -63,12 +68,65 @@ export async function GET(
       );
     }
 
+    // Sintetizar conteúdo com Claude
+    const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+
+    if (!anthropicApiKey) {
+      console.warn("[PERF] ANTHROPIC_API_KEY não configurada, retornando conteúdo original");
+      return NextResponse.json({
+        ok: true,
+        article,
+      });
+    }
+
+    console.log("[PERF] Chamando Claude API para sintetizar conteúdo...");
+    const startClaude = Date.now();
+
+    const prompt = `Sintetize esta notícia em 3-4 parágrafos informativos com HTML <p>. Título: ${article.title}. Descrição: ${article.description}. Conteúdo: ${article.content}`;
+
+    const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": anthropicApiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 600,
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+      }),
+    });
+
+    console.log(`[PERF] Claude API respondeu em ${Date.now() - startClaude}ms`);
+
+    if (!claudeResponse.ok) {
+      console.error("[PERF] Erro ao chamar Claude API:", await claudeResponse.text());
+      return NextResponse.json({
+        ok: true,
+        article,
+      });
+    }
+
+    const claudeData = await claudeResponse.json();
+    const synthesizedContent = claudeData.content?.[0]?.text || article.content;
+
+    console.log(`[PERF] Conteúdo sintetizado com sucesso (${synthesizedContent.length} caracteres)`);
+
     return NextResponse.json({
       ok: true,
-      article,
+      article: {
+        ...article,
+        content: synthesizedContent,
+      },
     });
   } catch (error) {
-    console.error("Erro ao buscar notícia:", error);
+    console.error("[PERF] Erro ao buscar notícia:", error);
     return NextResponse.json(
       { ok: false, error: "Erro interno do servidor" },
       { status: 500 }
