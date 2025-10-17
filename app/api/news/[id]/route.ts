@@ -107,14 +107,9 @@ export async function GET(
 
     if (!claudeResponse.ok) {
       console.error("[PERF] Erro ao chamar Claude API:", await claudeResponse.text());
-      const claudeData = await claudeResponse.json();
-      const synthesizedContent = claudeData.content?.[0]?.text || article.content;
       return NextResponse.json({
         ok: true,
-        article: {
-          ...article,
-          content: synthesizedContent,
-        },
+        article,
       });
     }
 
