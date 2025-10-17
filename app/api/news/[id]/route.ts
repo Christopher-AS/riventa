@@ -34,30 +34,39 @@ export async function GET(
 
     // Decodifica o ID que pode ser um título codificado
     const decodedId = decodeURIComponent(id);
+    console.log('[DEBUG] Buscando:', decodedId);
 
     console.log("[PERF] Buscando notícias da NewsAPI...");
     const startNewsApi = Date.now();
 
-    // Busca notícias recentes e tenta encontrar a correspondente
-    const url = `https://newsapi.org/v2/top-headlines?country=br&apiKey=${newsApiKey}&pageSize=100`;
+    // Busca notícias de AMBOS países: br e us
+    const urlBr = `https://newsapi.org/v2/top-headlines?country=br&apiKey=${newsApiKey}&pageSize=100`;
+    const urlUs = `https://newsapi.org/v2/top-headlines?country=us&apiKey=${newsApiKey}&pageSize=100`;
     
-    const response = await fetch(url, {
-      next: { revalidate: 300 }, // Cache por 5 minutos
-    });
+    const [responseBr, responseUs] = await Promise.all([
+      fetch(urlBr, { next: { revalidate: 300 } }),
+      fetch(urlUs, { next: { revalidate: 300 } }),
+    ]);
 
     console.log(`[PERF] NewsAPI respondeu em ${Date.now() - startNewsApi}ms`);
 
-    if (!response.ok) {
+    if (!responseBr.ok || !responseUs.ok) {
       return NextResponse.json(
         { ok: false, error: "Erro ao buscar notícia" },
-        { status: response.status }
+        { status: responseBr.ok ? responseUs.status : responseBr.status }
       );
     }
 
-    const data: NewsAPIResponse = await response.json();
+    const dataBr: NewsAPIResponse = await responseBr.json();
+    const dataUs: NewsAPIResponse = await responseUs.json();
 
-    // Encontra a notícia pelo título
-    const article = data.articles.find(
+    // Combina todos os artigos em um único array
+    const allArticles = [...dataBr.articles, ...dataUs.articles];
+
+    console.log('[DEBUG] Títulos disponíveis:', allArticles.map(a => a.title));
+
+    // Encontra a notícia pelo título OU URL
+    const article = allArticles.find(
       (a) => a.title === decodedId || a.url.includes(decodedId)
     );
 
