@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import SourceBadge from "@/components/news/SourceBadge";
 
 type NewsArticle = {
   title: string;
@@ -135,30 +136,9 @@ export default function NewsDetailPage({ params }: PageProps) {
           <div className="prose prose-lg max-w-none">
             {contentParagraphs.map((paragraph, index) => (
               <p key={index} className="text-gray-700 mb-4 leading-relaxed">
-                {paragraph}
+                {paragraph} <SourceBadge sourceNumber={1} sourceName={article.source.name} sourceUrl={article.url} />
               </p>
             ))}
-          </div>
-        </div>
-
-        {/* Fontes */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Fontes</h2>
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-              <div>
-                <p className="font-medium text-gray-900">{article.source.name}</p>
-                <a
-                  href={article.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 hover:text-blue-600 text-sm break-all"
-                >
-                  {article.url}
-                </a>
-              </div>
-            </div>
           </div>
         </div>
 
