@@ -82,7 +82,8 @@ export async function GET(
 
     // Decodifica o ID que pode ser um título codificado
     const decodedId = decodeURIComponent(id);
-    console.log('[DEBUG] Buscando:', decodedId);
+    console.log('[DEBUG] ID decodificado:', decodedId);
+    console.log('[DEBUG] Buscando título exato ou URL contendo:', decodedId.substring(0, 50));
 
     console.log("[PERF] Buscando notícias da NewsAPI...");
     const startNewsApi = Date.now();
@@ -114,6 +115,8 @@ export async function GET(
     // Limpa títulos removendo ' - Fonte' do final
     allArticles = allArticles.map(a => ({...a, title: a.title.replace(/\s*-\s*[^-]+$/, '').trim()}));
 
+    console.log('[DEBUG] Total de artigos disponíveis:', allArticles.length);
+    console.log('[DEBUG] Primeiros 3 títulos:', allArticles.slice(0, 3).map(a => a.title));
     console.log('[DEBUG] Títulos disponíveis:', allArticles.map(a => a.title));
 
     // Encontra a notícia pelo título OU URL
@@ -122,6 +125,8 @@ export async function GET(
     );
 
     if (!article) {
+      console.log('[DEBUG] NÃO ENCONTRADO! Título buscado:', decodedId);
+      console.log('[DEBUG] Tentando busca parcial...');
       return NextResponse.json(
         { ok: false, error: "Notícia não encontrada" },
         { status: 404 }
