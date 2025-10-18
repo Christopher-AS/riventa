@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
+  let text = '';
+  
   try {
-    const { text } = await request.json();
+    const body = await request.json();
+    text = body.text;
     const apiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!apiKey) {
@@ -27,6 +30,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ translated: data.content[0].text });
   } catch (error) {
     console.error('Erro na tradução:', error);
-    return NextResponse.json({ translated: text });
+    return NextResponse.json({ translated: text || '' });
   }
 }
