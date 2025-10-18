@@ -168,7 +168,7 @@ export async function GET(
       .map((a, idx) => `${idx + 1}. ${a.source.name}: "${a.title}"\n   ${a.description || 'Sem descrição'}`)
       .join('\n\n');
 
-    const prompt = `Sintetize estas ${allRelatedArticles.length} fontes sobre ${article.title} em 4 parágrafos informativos com HTML <p>. Fontes:\n\n${sourcesList}`;
+    const prompt = `Sintetize estas ${allRelatedArticles.length} fontes sobre ${article.title} em 4 parágrafos informativos em texto puro (sem tags HTML). Separe parágrafos com dupla quebra de linha. Fontes:\n\n${sourcesList}`;
 
     const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
