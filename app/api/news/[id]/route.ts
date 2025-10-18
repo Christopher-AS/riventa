@@ -80,8 +80,8 @@ export async function GET(
       );
     }
 
-    // Decodifica o ID que pode ser um título codificado
-    const decodedId = decodeURIComponent(id);
+    // Decodifica o ID que pode ser um título codificado (DUPLO encoding)
+    const decodedId = decodeURIComponent(decodeURIComponent(id));
     console.log('[DEBUG] ID decodificado:', decodedId);
     console.log('[DEBUG] Buscando título exato ou URL contendo:', decodedId.substring(0, 50));
 
