@@ -26,6 +26,7 @@ function getSimilarArticles(mainArticle: NewsArticle, allArticles: NewsArticle[]
     .filter(word => word.length >= 4)
     .map(word => word.replace(/[^\w]/g, '')); // Remove pontuação
 
+  console.log('[DEBUG] Buscando similares com palavras:', mainWords);
   console.log('[DEBUG] Palavras-chave do artigo principal:', mainWords);
 
   const similarArticles: Array<{ article: NewsArticle; commonWords: number }> = [];
@@ -54,6 +55,62 @@ function getSimilarArticles(mainArticle: NewsArticle, allArticles: NewsArticle[]
 
   // Ordena por número de palavras em comum (mais similar primeiro)
   similarArticles.sort((a, b) => b.commonWords - a.commonWords);
+
+  console.log(`[DEBUG] Encontrados ${similarArticles.length} artigos com 3+ palavras em comum`);
+
+  // Se não encontrou pelo menos 3 artigos, tenta com 2 palavras em comum
+  if (similarArticles.length < 3) {
+    console.log('[DEBUG] Menos de 3 artigos encontrados, tentando com 2 palavras em comum...');
+    
+    for (const article of allArticles) {
+      // Não incluir o próprio artigo principal
+      if (article.url === mainArticle.url || article.title === mainArticle.title) {
+        continue;
+      }
+
+      // Pula se já está na lista
+      if (similarArticles.some(item => item.article.url === article.url)) {
+        continue;
+      }
+
+      // Extrai palavras do título do artigo candidato
+      const candidateWords = article.title
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(word => word.length >= 4)
+        .map(word => word.replace(/[^\w]/g, ''));
+
+      // Conta palavras em comum
+      const commonWords = mainWords.filter(word => candidateWords.includes(word)).length;
+
+      // Se tem 2 ou mais palavras em comum, adiciona
+      if (commonWords >= 2) {
+        similarArticles.push({ article, commonWords });
+      }
+    }
+
+    // Reordena incluindo os novos artigos
+    similarArticles.sort((a, b) => b.commonWords - a.commonWords);
+    console.log(`[DEBUG] Após busca com 2 palavras: ${similarArticles.length} artigos`);
+  }
+
+  // Se ainda não tem pelo menos 3, pega os 5 mais recentes
+  if (similarArticles.length < 3) {
+    console.log('[DEBUG] Ainda menos de 3 artigos, pegando os 5 mais recentes...');
+    
+    const recentArticles = allArticles
+      .filter(article => 
+        article.url !== mainArticle.url && 
+        article.title !== mainArticle.title &&
+        !similarArticles.some(item => item.article.url === article.url)
+      )
+      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+      .slice(0, 5)
+      .map(article => ({ article, commonWords: 0 }));
+
+    similarArticles.push(...recentArticles);
+    console.log(`[DEBUG] Após adicionar recentes: ${similarArticles.length} artigos`);
+  }
 
   // Retorna até 10 artigos similares
   const result = similarArticles.slice(0, 10).map(item => item.article);
