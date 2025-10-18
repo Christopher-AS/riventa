@@ -301,9 +301,9 @@ export async function GET(
       const translatedText = translateData.content?.[0]?.text || '';
       
       // Extrair título, descrição e conteúdo traduzidos
-      const titleMatch = translatedText.match(/Título:\s*(.+?)(?:\n\n|$)/s);
-      const descriptionMatch = translatedText.match(/Descrição:\s*(.+?)(?:\n\n|$)/s);
-      const contentMatch = translatedText.match(/Conteúdo:\s*(.+)$/s);
+      const titleMatch = translatedText.match(/Título:\s*(.+?)(?:\n\n|$)/);
+      const descriptionMatch = translatedText.match(/Descrição:\s*(.+?)(?:\n\n|$)/);
+      const contentMatch = translatedText.match(/Conteúdo:\s*([\s\S]+)$/);
 
       if (titleMatch) translatedTitle = titleMatch[1].trim();
       if (descriptionMatch) translatedDescription = descriptionMatch[1].trim();
