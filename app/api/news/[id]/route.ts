@@ -59,6 +59,8 @@ function getSimilarArticles(mainArticle: NewsArticle, allArticles: NewsArticle[]
   const result = similarArticles.slice(0, 10).map(item => item.article);
   
   console.log(`[DEBUG] Encontrados ${result.length} artigos similares`);
+  console.log('[DEBUG] Artigos similares:', result.length);
+  console.log('[DEBUG] Sources retornadas:', result.map(a => a.source.name));
   
   return result;
 }
@@ -107,7 +109,10 @@ export async function GET(
     const dataUs: NewsAPIResponse = await responseUs.json();
 
     // Combina todos os artigos em um único array
-    const allArticles = [...dataBr.articles, ...dataUs.articles];
+    let allArticles = [...dataBr.articles, ...dataUs.articles];
+
+    // Limpa títulos removendo ' - Fonte' do final
+    allArticles = allArticles.map(a => ({...a, title: a.title.replace(/\s*-\s*[^-]+$/, '').trim()}));
 
     console.log('[DEBUG] Títulos disponíveis:', allArticles.map(a => a.title));
 
