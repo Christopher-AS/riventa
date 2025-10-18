@@ -17,6 +17,52 @@ type NewsAPIResponse = {
   articles: NewsArticle[];
 };
 
+// Função para encontrar artigos similares baseado em palavras-chave do título
+function getSimilarArticles(mainArticle: NewsArticle, allArticles: NewsArticle[]): NewsArticle[] {
+  // Extrai palavras do título principal (mínimo 4 letras)
+  const mainWords = mainArticle.title
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(word => word.length >= 4)
+    .map(word => word.replace(/[^\w]/g, '')); // Remove pontuação
+
+  console.log('[DEBUG] Palavras-chave do artigo principal:', mainWords);
+
+  const similarArticles: Array<{ article: NewsArticle; commonWords: number }> = [];
+
+  for (const article of allArticles) {
+    // Não incluir o próprio artigo principal
+    if (article.url === mainArticle.url || article.title === mainArticle.title) {
+      continue;
+    }
+
+    // Extrai palavras do título do artigo candidato
+    const candidateWords = article.title
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(word => word.length >= 4)
+      .map(word => word.replace(/[^\w]/g, ''));
+
+    // Conta palavras em comum
+    const commonWords = mainWords.filter(word => candidateWords.includes(word)).length;
+
+    // Se tem 3 ou mais palavras em comum, é similar
+    if (commonWords >= 3) {
+      similarArticles.push({ article, commonWords });
+    }
+  }
+
+  // Ordena por número de palavras em comum (mais similar primeiro)
+  similarArticles.sort((a, b) => b.commonWords - a.commonWords);
+
+  // Retorna até 10 artigos similares
+  const result = similarArticles.slice(0, 10).map(item => item.article);
+  
+  console.log(`[DEBUG] Encontrados ${result.length} artigos similares`);
+  
+  return result;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -77,6 +123,14 @@ export async function GET(
       );
     }
 
+    // Busca artigos similares
+    const similarArticles = getSimilarArticles(article, allArticles);
+    
+    // Junta artigo principal + similares
+    const allRelatedArticles = [article, ...similarArticles];
+    
+    console.log(`[DEBUG] Total de artigos para síntese: ${allRelatedArticles.length}`);
+
     // Sintetizar conteúdo com Claude
     const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
 
@@ -84,14 +138,25 @@ export async function GET(
       console.warn("[PERF] ANTHROPIC_API_KEY não configurada, retornando conteúdo original");
       return NextResponse.json({
         ok: true,
-        article,
+        article: {
+          ...article,
+          sources: similarArticles.map(a => ({
+            name: a.source.name,
+            url: a.url
+          }))
+        },
       });
     }
 
     console.log("[PERF] Chamando Claude API para sintetizar conteúdo...");
     const startClaude = Date.now();
 
-    const prompt = `Sintetize esta notícia em 3-4 parágrafos informativos com HTML <p>. Título: ${article.title}. Descrição: ${article.description}. Conteúdo: ${article.content}`;
+    // Monta lista de fontes para o prompt
+    const sourcesList = allRelatedArticles
+      .map((a, idx) => `${idx + 1}. ${a.source.name}: "${a.title}"\n   ${a.description || 'Sem descrição'}`)
+      .join('\n\n');
+
+    const prompt = `Sintetize estas ${allRelatedArticles.length} fontes sobre ${article.title} em 4 parágrafos informativos com HTML <p>. Fontes:\n\n${sourcesList}`;
 
     const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -118,7 +183,13 @@ export async function GET(
       console.error("[PERF] Erro ao chamar Claude API:", await claudeResponse.text());
       return NextResponse.json({
         ok: true,
-        article,
+        article: {
+          ...article,
+          sources: similarArticles.map(a => ({
+            name: a.source.name,
+            url: a.url
+          }))
+        },
       });
     }
 
@@ -132,6 +203,10 @@ export async function GET(
       article: {
         ...article,
         content: synthesizedContent,
+        sources: similarArticles.map(a => ({
+          name: a.source.name,
+          url: a.url
+        }))
       },
     });
   } catch (error) {
