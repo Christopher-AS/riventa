@@ -269,11 +269,58 @@ export async function GET(
 
     console.log(`[PERF] Conteúdo sintetizado com sucesso (${synthesizedContent.length} caracteres)`);
 
+    // Traduzir título, descrição e conteúdo sintetizado
+    console.log("[PERF] Chamando Claude API para traduzir conteúdo...");
+    const startTranslate = Date.now();
+
+    const translateResponse = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': anthropicApiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: `Traduza para português (pt-BR):\n\nTítulo: ${article.title}\n\nDescrição: ${article.description || ''}\n\nConteúdo: ${synthesizedContent}`
+        }]
+      })
+    });
+
+    console.log(`[PERF] Tradução respondeu em ${Date.now() - startTranslate}ms`);
+
+    let translatedTitle = article.title;
+    let translatedDescription = article.description;
+    let translatedContent = synthesizedContent;
+
+    if (translateResponse.ok) {
+      const translateData = await translateResponse.json();
+      const translatedText = translateData.content?.[0]?.text || '';
+      
+      // Extrair título, descrição e conteúdo traduzidos
+      const titleMatch = translatedText.match(/Título:\s*(.+?)(?:\n\n|$)/s);
+      const descriptionMatch = translatedText.match(/Descrição:\s*(.+?)(?:\n\n|$)/s);
+      const contentMatch = translatedText.match(/Conteúdo:\s*(.+)$/s);
+
+      if (titleMatch) translatedTitle = titleMatch[1].trim();
+      if (descriptionMatch) translatedDescription = descriptionMatch[1].trim();
+      if (contentMatch) translatedContent = contentMatch[1].trim();
+
+      console.log(`[PERF] Conteúdo traduzido com sucesso`);
+    } else {
+      console.error("[PERF] Erro ao traduzir conteúdo:", await translateResponse.text());
+    }
+
     return NextResponse.json({
       ok: true,
       article: {
         ...article,
-        content: synthesizedContent,
+        title: translatedTitle,
+        description: translatedDescription,
+        content: translatedContent,
         sources: similarArticles.map(a => ({
           name: a.source.name,
           url: a.url
