@@ -87,8 +87,6 @@ function NewsCard({ article }: { article: NewsArticle }) {
             </p>
           )}
           <div className="flex items-center gap-2 text-xs text-gray-500">
-            <span className="font-medium">{article.source.name}</span>
-            <span>•</span>
             <time dateTime={article.publishedAt}>{date}</time>
           </div>
         </div>
