@@ -52,10 +52,14 @@ function NewsCardSkeleton() {
 }
 
 function NewsCard({ article }: { article: NewsArticle }) {
+  const cleanTitle = article.title.replace(/\s*-\s*[^-]+$/, '').trim();
+  
   const date = new Date(article.publishedAt).toLocaleDateString("pt-BR", {
-    day: "2-digit",
+    day: "numeric",
     month: "short",
     year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 
   return (
@@ -75,7 +79,7 @@ function NewsCard({ article }: { article: NewsArticle }) {
         )}
         <div className="flex-1 space-y-2">
           <h3 className="font-semibold text-gray-900 line-clamp-2">
-            {article.title}
+            {cleanTitle}
           </h3>
           {article.description && (
             <p className="text-sm text-gray-600 line-clamp-2">
