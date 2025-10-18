@@ -106,6 +106,16 @@ export default function Page({
   const [error, setError] = useState<string | null>(null);
   const [articles, setArticles] = useState<NewsArticle[]>([]);
 
+  const translateText = async (text: string) => {
+    const response = await fetch('/api/translate', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({text})
+    });
+    const data = await response.json();
+    return data.translated;
+  };
+
   useEffect(() => {
     async function fetchNews() {
       try {
@@ -128,7 +138,17 @@ export default function Page({
         }
 
         const data: NewsResponse = await res.json();
-        setArticles(data.articles ?? []);
+        const fetchedArticles = data.articles ?? [];
+        
+        const translatedArticles = await Promise.all(
+          fetchedArticles.map(async (a) => ({
+            ...a,
+            title: await translateText(a.title),
+            description: a.description ? await translateText(a.description) : a.description
+          }))
+        );
+        
+        setArticles(translatedArticles);
       } catch (err) {
         console.error("Erro ao buscar notícias:", err);
         setError("Erro ao carregar notícias. Por favor, tente novamente.");
