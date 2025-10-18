@@ -120,7 +120,7 @@ export default function NewsDetailPage({ params }: PageProps) {
           <div className="prose prose-lg max-w-none">
             {contentParagraphs.map((paragraph, index) => (
               <p key={index} className="text-gray-700 mb-4 leading-relaxed">
-                {paragraph} <SourceBadge sourceNumber={1} sourceName={article.source.name} sourceUrl={article.url} />
+                {paragraph} <SourceBadge sources={[{name: article.source.name, url: article.url}]} />
               </p>
             ))}
           </div>
