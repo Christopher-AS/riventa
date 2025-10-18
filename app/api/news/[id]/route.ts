@@ -180,7 +180,9 @@ export async function GET(
 
     // Encontra a notícia pelo título OU URL
     const article = allArticles.find(
-      (a) => a.title === cleanDecodedId || a.url.includes(decodedId)
+      (a) => a.title === cleanDecodedId || 
+             a.title.toLowerCase().includes(cleanDecodedId.toLowerCase()) ||
+             a.url.includes(decodedId)
     );
 
     if (!article) {
