@@ -82,6 +82,8 @@ export async function GET(
 
     // Decodifica o ID que pode ser um título codificado (DUPLO encoding)
     const decodedId = decodeURIComponent(decodeURIComponent(id));
+    const cleanDecodedId = decodedId.replace(/\s*-\s*[^-]+$/, '').trim();
+    console.log('[DEBUG] ID limpo para busca:', cleanDecodedId);
     console.log('[DEBUG] ID decodificado:', decodedId);
     console.log('[DEBUG] Buscando título exato ou URL contendo:', decodedId.substring(0, 50));
 
@@ -121,11 +123,11 @@ export async function GET(
 
     // Encontra a notícia pelo título OU URL
     const article = allArticles.find(
-      (a) => a.title === decodedId || a.url.includes(decodedId)
+      (a) => a.title === cleanDecodedId || a.url.includes(decodedId)
     );
 
     if (!article) {
-      console.log('[DEBUG] NÃO ENCONTRADO! Título buscado:', decodedId);
+      console.log('[DEBUG] NÃO ENCONTRADO! Título buscado:', cleanDecodedId);
       console.log('[DEBUG] Tentando busca parcial...');
       return NextResponse.json(
         { ok: false, error: "Notícia não encontrada" },
