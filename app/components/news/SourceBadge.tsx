@@ -3,42 +3,42 @@
 import { useState } from "react";
 
 type SourceBadgeProps = {
-  sourceNumber: number;
-  sourceName: string;
-  sourceUrl: string;
+  sources: Array<{ name: string; url: string }>;
 };
 
-export default function SourceBadge({
-  sourceNumber,
-  sourceName,
-  sourceUrl,
-}: SourceBadgeProps) {
+export default function SourceBadge({ sources }: SourceBadgeProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
     <span className="relative inline-block">
       <span
-        className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-medium cursor-pointer"
+        className="text-blue-600 font-medium cursor-pointer hover:underline"
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
-        [{sourceNumber}]
+        Fonte
       </span>
 
       {showTooltip && (
         <div
-          className="bg-gray-900 text-white p-2 rounded shadow-lg absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 whitespace-nowrap z-10"
+          className="bg-gray-900 text-white p-3 rounded-lg max-w-xs absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-10 shadow-lg"
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
         >
-          <a
-            href={sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline"
-          >
-            {sourceName}
-          </a>
+          <div className="space-y-2">
+            {sources.map((source, index) => (
+              <div key={index}>
+                <a
+                  href={source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline block"
+                >
+                  {source.name}
+                </a>
+              </div>
+            ))}
+          </div>
           <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
         </div>
       )}
