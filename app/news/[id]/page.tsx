@@ -86,6 +86,14 @@ export default function NewsDetailPage({ params }: PageProps) {
     ? article.content.split(/\n+/).filter((p) => p.trim().length > 0)
     : [article.description];
 
+  const publishedDate = new Date(article.publishedAt).toLocaleDateString('pt-BR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
@@ -102,6 +110,9 @@ export default function NewsDetailPage({ params }: PageProps) {
         <h1 className="text-3xl font-bold text-gray-900 mb-4">
           {article.title}
         </h1>
+
+        {/* Data de Publicação */}
+        <div className="text-sm text-gray-600 mb-6">{publishedDate}</div>
 
         {/* Imagem Hero */}
         {article.urlToImage && (
