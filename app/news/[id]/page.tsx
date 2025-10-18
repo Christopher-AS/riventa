@@ -15,6 +15,7 @@ type NewsArticle = {
   source: {
     name: string;
   };
+  sources?: Array<{ name: string; url: string }>;
 };
 
 type PageProps = {
@@ -39,6 +40,7 @@ export default function NewsDetailPage({ params }: PageProps) {
           return;
         }
 
+        console.log('Fontes recebidas:', data.article.sources);
         setArticle(data.article);
       } catch (err) {
         console.error("Erro ao carregar notícia:", err);
@@ -120,7 +122,7 @@ export default function NewsDetailPage({ params }: PageProps) {
           <div className="prose prose-lg max-w-none">
             {contentParagraphs.map((paragraph, index) => (
               <p key={index} className="text-gray-700 mb-4 leading-relaxed">
-                {paragraph} <SourceBadge sources={[{name: article.source.name, url: article.url}]} />
+                {paragraph} <SourceBadge sources={article.sources || [{name: article.source.name, url: article.url}]} />
               </p>
             ))}
           </div>
