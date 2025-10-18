@@ -17,25 +17,6 @@ type NewsAPIResponse = {
   articles: NewsArticle[];
 };
 
-// Função para traduzir texto usando Claude
-async function translateText(text: string, apiKey: string): Promise<string> {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 200,
-      messages: [{role: 'user', content: 'Traduza para português (pt-BR): ' + text}]
-    })
-  });
-  const data = await response.json();
-  return data.content[0].text;
-}
-
 // Função para encontrar artigos similares baseado em palavras-chave do título
 function getSimilarArticles(mainArticle: NewsArticle, allArticles: NewsArticle[]): NewsArticle[] {
   // Extrai palavras do título principal (mínimo 4 letras)
@@ -147,16 +128,6 @@ export async function GET(
       );
     }
 
-    // Traduz título e descrição do artigo principal
-    const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
-    
-    if (anthropicApiKey) {
-      article.title = await translateText(article.title, anthropicApiKey);
-      if (article.description) {
-        article.description = await translateText(article.description, anthropicApiKey);
-      }
-    }
-
     // Busca artigos similares
     const similarArticles = getSimilarArticles(article, allArticles);
     
@@ -166,6 +137,7 @@ export async function GET(
     console.log(`[DEBUG] Total de artigos para síntese: ${allRelatedArticles.length}`);
 
     // Sintetizar conteúdo com Claude
+    const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
 
     if (!anthropicApiKey) {
       console.warn("[PERF] ANTHROPIC_API_KEY não configurada, retornando conteúdo original");
