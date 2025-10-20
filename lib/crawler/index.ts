@@ -519,7 +519,7 @@ export class EthicalCrawler {
     return {
       userAgent: 'RiventaBot/1.0 (Ethical News Aggregator; +https://riventa.com/bot)',
       timeout: 30000,
-      maxRetries: 3,
+      retries: 3,
       respectRobotsTxt: true,
       maxConcurrent: 5,
       rateLimits: {
