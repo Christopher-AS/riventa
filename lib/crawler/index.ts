@@ -8,7 +8,7 @@ import * as cheerio from 'cheerio';
 import { RobotsParser } from './robots-parser';
 import { RateLimiter } from './rate-limiter';
 import { CrawlerConfig, CrawlSource, CrawlResult, CrawlJob, Article, Source } from './types';
-import { BRAZILIAN_NEWS_SOURCES } from './sources';
+import brazilianSources from './sources';
 
 export class EthicalCrawler {
   private config: CrawlerConfig;
@@ -228,9 +228,9 @@ export class EthicalCrawler {
   async crawlAll(): Promise<Article[]> {
     const allArticles: Article[] = [];
 
-    console.log(`[Crawler] Starting crawl of all enabled sources (${BRAZILIAN_NEWS_SOURCES.length} sources)`);
+    console.log(`[Crawler] Starting crawl of all enabled sources (${brazilianSources.length} sources)`);
 
-    for (const source of BRAZILIAN_NEWS_SOURCES) {
+    for (const source of brazilianSources) {
       if (!source.enabled) {
         console.log(`[Crawler] Skipping disabled source: ${source.name}`);
         continue;
@@ -375,7 +375,7 @@ export class EthicalCrawler {
 
       try {
         // Find the source
-        const source = BRAZILIAN_NEWS_SOURCES.find(s => s.id === job.sourceId);
+        const source = brazilianSources.find(s => s.id === job.sourceId);
         if (!source) {
           throw new Error(`Source ${job.sourceId} not found`);
         }
