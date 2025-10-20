@@ -10,10 +10,13 @@ export interface Source {
   enabled: boolean;
   priority: number;
   selectors: {
+    article?: string;
     title: string;
     content: string;
     date: string;
     author: string;
+    image?: string;
+    category?: string;
   };
   crawlFrequency: number;
 }
