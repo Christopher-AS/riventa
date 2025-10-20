@@ -129,7 +129,7 @@ export class EthicalCrawler {
    */
   private extractArticle(
     $: cheerio.CheerioAPI,
-    element: cheerio.Element,
+    element: cheerio.AnyNode,
     source: Source,
     pageUrl: string
   ): Article | null {
