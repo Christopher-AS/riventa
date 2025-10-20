@@ -9,8 +9,8 @@ export class RateLimiter {
   private config: RateLimiterConfig;
   private tokens: number;
   private lastRefill: number;
-  private readonly maxTokens: number;
-  private readonly refillRate: number; // tokens per millisecond
+  private maxTokens: number;
+  private refillRate: number; // tokens per millisecond
 
   constructor(config: RateLimiterConfig) {
     this.config = config;
