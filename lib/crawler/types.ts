@@ -18,7 +18,7 @@ export interface Source {
     image?: string;
     category?: string;
   };
-  crawlFrequency: number;
+  crawlFrequency: string;
 }
 
 export interface Article {
