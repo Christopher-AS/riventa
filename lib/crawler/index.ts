@@ -522,14 +522,7 @@ export class EthicalCrawler {
       retries: 3,
       respectRobotsTxt: true,
       maxConcurrent: 5,
-      rateLimits: {
-        requestsPerSecond: 2,
-        requestsPerMinute: 10,
-        requestsPerHour: 100,
-        respectCrawlDelay: true,
-        minDelayMs: 1000,
-        maxDelayMs: 5000,
-      },
+      requestsPerSecond: 2,
       ...overrides,
     };
   }
